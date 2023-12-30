@@ -1,15 +1,21 @@
+from scipy.optimize import root
 from load_data import *
 from util_funcs import *
 
 
-def lnlike(theta,chi2_funcs,params):
+def lnlike(theta,chi2_funcs,params,ln_prior):
     '''
     Log-likehood function based on experimental data from oscillations and limits on the effective
     electron antineutrino mass and the effective Majorana mass.
     '''
 
+    # if the prior is negative infinity, don't bother computing the likelihoods
+    if np.isneginf(ln_prior):
+        return -np.inf
+
+    # get the chi^2 functions to construct the likelihoods
     sigma,delta_m2_21,delta_m2_23,theta12,theta13,alpha21,alpha31_minus_delta = theta
-    chi2_m2_beta,chi2_halflife,chi2_delta_m2_21,chi2_delta_m2_23,chi2_sin2_theta12,chi2_sin2_theta13 = chi2_funcs
+    chi2_m2_beta,chi2_halflife,chi2_sin2_theta12,chi2_sin2_theta13,chi2_delta_m2_21,chi2_delta_m2_23 = chi2_funcs
 
     # constraints from oscillation data from nu-fit
     lnlike_sin2_theta12 = -chi2_sin2_theta12(np.sin(theta12)**2)/2.
@@ -18,12 +24,14 @@ def lnlike(theta,chi2_funcs,params):
     lnlike_delta_m32_2 = -chi2_delta_m2_23(delta_m2_23)/2.
 
     # constraints from KATRIN
-    m1,m2,m3 = fsolve(basis_change(sigma,delta_m2_21,delta_m2_23),x0=[1e-1]*3,xtol=1e-12)
-    m_beta = m_b(m1,m2,m3,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13))
+    masses,success = basis_change(sigma,delta_m2_21,delta_m2_23)
+    if success is False:
+        return -np.inf
+    m_beta = m_b(*masses,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13))
     lnlike_m_beta = -chi2_m2_beta(m_beta**2)/2.
 
     # constraints from KamLAND-Zen
-    m_betabeta = m_bb(m1,m2,m3,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13),alpha21,alpha31_minus_delta)
+    m_betabeta = m_bb(*masses,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13),alpha21,alpha31_minus_delta)
     halflife = T_half(m_betabeta,params)
     lnlike_halflife = -chi2_halflife(halflife)/2.
 
@@ -60,4 +68,8 @@ def lnprob(theta,inverted,chi2_funcs,params):
     '''
     Function to be passed to the MCMC sampler.
     '''
-    return lnprior(theta,inverted) + lnlike(theta,chi2_funcs,params)
+
+    lp = lnprior(theta,inverted)
+    ll = lnlike(theta,chi2_funcs,params,lp)
+
+    return lp + ll

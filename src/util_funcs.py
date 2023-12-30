@@ -1,17 +1,35 @@
 import numpy as np
-from scipy.optimize import fsolve
+from scipy.optimize import root
+
 
 def basis_change(sigma,dm2_21,dm2_23):
     '''
-    Returns a function that can be minimized numerically to find the 3 masses given the
-    mass squared differences and sum of masses.
+    Finds the 3 individual neutrino masses given the sum and mass squared differences.
     '''
-    def func(m):
-        '''
-        Function to minimize to invert the basis change.
-        '''
-        return [m[0]+m[1]+m[2]-sigma,m[1]**2-m[0]**2-dm2_21,m[1]**2-m[2]**2-dm2_23]
-    return func
+    
+    # function whose roots give the individual neutrino masses
+    func = lambda m: [m[0]+m[1]+m[2]-sigma,m[1]**2-m[0]**2-dm2_21,m[1]**2-m[2]**2-dm2_23]
+
+    # try to find the roots with a naive guess
+    sol = root(func,x0=[1e-1]*3,tol=1e-12)
+    masses = sol.x
+    success = sol.success
+
+    # if that doesn't work, randomly adjust the guess until the roots are found or
+    # the maximum number of iterations is exceeded (grid search or something more
+    # sensible hasn't worked for me)
+    iters = 0
+    while success==False:
+        sol = root(func,x0=np.random.normal(loc=1e-1,scale=5e-2,size=3),tol=1e-12)
+        masses = sol.x
+        success = sol.success
+        iters += 1
+        if iters>1e3:
+            print('Failed to find roots of basis change function.')
+            break
+
+    return masses,success
+
 
 def m_b(m1,m2,m3,s12,s13,c12,c13):
     '''
@@ -40,5 +58,7 @@ def model(theta):
     Model that describes the posterior probability distribution to be sampled from.
     '''
     sigma,delta_m2_21,delta_m2_23,theta12,theta13,alpha21,alpha31_minus_delta = theta
-    m1,m2,m3 = fsolve(basis_change(sigma,delta_m2_21,delta_m2_23),x0=[1e-1]*3,xtol=1e-12)
-    return m_bb(m1,m2,m3,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13),alpha21,alpha31_minus_delta)
+    masses,success = basis_change(sigma,delta_m2_21,delta_m2_23)
+    if success is False:
+        masses = np.zeros_like(masses)
+    return m_bb(*masses,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13),alpha21,alpha31_minus_delta)
