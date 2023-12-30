@@ -1,5 +1,5 @@
 [project]
-name = "neutrino-plots"
+name = "neutrinoplots"
 description = "Code to make common plots for neutrino physics."
 dynamic = ["version","dependencies"]
 
