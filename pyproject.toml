@@ -1,0 +1,17 @@
+[project]
+name = "neutrino-plots"
+description = "Code to make common plots for neutrino physics."
+dynamic = ["version","dependencies"]
+
+[build-system]
+requires = ["setuptools >= 61.0.0","setuptools-git-versioning"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
