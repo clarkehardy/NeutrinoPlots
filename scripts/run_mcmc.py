@@ -3,8 +3,6 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool,cpu_count
-import sys
-sys.path.insert(0,'../src/')
 from load_data import *
 from prob_funcs import *
 from util_funcs import *
