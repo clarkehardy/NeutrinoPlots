@@ -62,3 +62,31 @@ def model(theta):
     if success is False:
         masses = np.zeros_like(masses)
     return m_bb(*masses,np.sin(theta12),np.sin(theta13),np.cos(theta12),np.cos(theta13),alpha21,alpha31_minus_delta)
+
+
+def m2_no(m1,dm2_21):
+    '''
+    Mass 2 as a function of mass 1 under normal ordering.
+    '''
+    return np.sqrt(m1**2 + dm2_21)
+
+
+def m3_no(m1,dm2_21,dm2_23):
+    '''
+    Mass 3 as a function of mass 1 under normal ordering.
+    '''
+    return np.sqrt(m1**2 + dm2_21 - dm2_23)
+
+
+def m1_io(m3,dm2_23,dm2_21):
+    '''
+    Mass 1 as a function of mass 3 under inverted ordering.
+    '''
+    return np.sqrt(m3**2 + dm2_23 - dm2_21)
+
+
+def m2_io(m3,dm2_23):
+    '''
+    Mass 2 as a function of mass 3 under inverted ordering.
+    '''
+    return np.sqrt(m3**2 + dm2_23)
