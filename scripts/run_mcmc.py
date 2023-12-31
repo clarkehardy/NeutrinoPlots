@@ -33,6 +33,7 @@ if __name__=='__main__':
     if outdir!='':
         outdir = outdir + '/'
         filename = outdir + filename
+    np.seterr(invalid='ignore')
 
     # load the chi-squared data from which the likelihood functions will be constructed
     chi2_m2_beta_func = load_endpoint_data()

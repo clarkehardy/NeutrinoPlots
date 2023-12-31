@@ -64,8 +64,8 @@ def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,param
     fig,axs = plt.subplots(1,2,figsize=(10,5),constrained_layout=True)
     if params is not None:
         colors = plt.get_cmap(cmap)
-        axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.9)
-        axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.9)
+        axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.85)
+        axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.85)
     if samples_no is not None:
         im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap,norm=LogNorm(vmax=vmax))
     if samples_io is not None:
