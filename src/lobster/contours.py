@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-from util_funcs import *
+from utils.util_funcs import *
 
 
 def get_3sigma_range(m_lightest,params,inverted=False,nsamples=1e4):

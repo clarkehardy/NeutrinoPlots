@@ -6,7 +6,7 @@ from utils.load_data import *
 
 if __name__=='__main__':
     '''
-    Make the lobster plot.
+    Make the lobster density plot.
     '''
 
     # command-line arguments
@@ -25,7 +25,7 @@ if __name__=='__main__':
     outfile = args.outfile
     allowed = args.allowed
     if outfile=='':
-        outfile = 'lobster.png'
+        outfile = 'lobster_density.png'
 
     # load the mcmc sample chain
     print('Loading the MCMC sample chains...')

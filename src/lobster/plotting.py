@@ -3,14 +3,16 @@ from matplotlib.colors import LogNorm
 from matplotlib import rcParams
 from matplotlib import style
 import numpy as np
-from util_funcs import *
-from prob_funcs import *
-from contours import *
+from utils.util_funcs import *
+from lobster.prob_funcs import *
+from lobster.contours import *
 style.use('clarke-default')
 
 
 def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,cmap='inferno'):
-
+    '''
+    Make the lobster plot showing the probability density in the allowed regions.
+    '''
     # colorbar does not work well with tight_layout so
     # ensure that it is not enabled by default
     rcParams.update({'figure.autolayout': False})
@@ -78,10 +80,32 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
         ax.set_xlabel(r'$m_{{{}}}$ [eV]'.format(2*i+1))
         ax.set_ylim([1e-4,1])
         ax.set_xlim([1e-5,1])
-        ax.grid()
     axs[0].set_ylabel(r'$m_{\beta\beta}$ [eV]')
     axs[1].set_yticklabels([])
     fig.suptitle('Marginalized posterior probability for the effective Majorana mass')
     fig.colorbar(im, ax=axs.ravel().tolist(),label='Probability density')
 
     return fig,axs
+
+
+def vanilla(params,npoints=1e4,nsamples=200):
+    '''
+    Make the vanilla lobster plot showing the allowed regions.
+    '''
+
+    m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=100,nsamples=1e4)
+    m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=100,nsamples=1e4)
+
+    fig,ax = plt.subplots()
+    ax.fill_between(m_lightest_no,m_lower_no,m_upper_no,color='red',alpha=0.5,label='Normal ordering')
+    ax.fill_between(m_lightest_io,m_lower_io,m_upper_io,color='blue',alpha=0.5,label='Inverted ordering')
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim([1e-4,1e0])
+    ax.set_xlim([1e-5,1e0])
+    ax.set_ylabel(r'$m_{\beta\beta}$ [eV]')
+    ax.set_xlabel(r'$m_\mathrm{lightest}$ [eV]')
+    ax.set_title(r'3$\sigma$ allowed regions for the effective Majorana mass')
+    ax.legend(loc='upper left')
+
+    return fig,ax

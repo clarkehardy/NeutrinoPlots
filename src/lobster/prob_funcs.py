@@ -1,6 +1,6 @@
 from scipy.optimize import root
-from load_data import *
-from util_funcs import *
+from utils.load_data import *
+from utils.util_funcs import *
 
 
 def lnlike(theta,chi2_funcs,params,ln_prior):
