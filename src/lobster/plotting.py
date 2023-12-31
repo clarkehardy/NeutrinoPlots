@@ -9,7 +9,7 @@ from contours import *
 style.use('clarke-default')
 
 
-def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,cmap='inferno'):
+def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,cmap='inferno'):
 
     # colorbar does not work well with tight_layout so
     # ensure that it is not enabled by default
@@ -57,8 +57,8 @@ def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,param
         X,Y = np.meshgrid(x_edges,y_edges)
 
     if params is not None:
-        m_lightest_no,m_lower_no,m_upper_no = make_contours(params,inverted=False,npoints=100,nsamples=1e4)
-        m_lightest_io,m_lower_io,m_upper_io = make_contours(params,inverted=True,npoints=100,nsamples=1e4)
+        m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=100,nsamples=1e4)
+        m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=100,nsamples=1e4)
 
     # make the plot
     fig,axs = plt.subplots(1,2,figsize=(10,5),constrained_layout=True)

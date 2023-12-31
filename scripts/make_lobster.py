@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
-from plot_results import *
+from lobster.plotting import *
+from utils.load_data import *
 
 
 if __name__=='__main__':
@@ -36,6 +37,6 @@ if __name__=='__main__':
         params = None
 
     print('Making the plot...')
-    fig,axs = lobster_plot(samples_no=samples_no,samples_io=samples_io,nbins=nbins,npoints=npoints,params=params)
+    fig,axs = density(samples_no=samples_no,samples_io=samples_io,nbins=nbins,npoints=npoints,params=params)
     fig.savefig(outfile)
     print('Figure saved to {}'.format(outfile))

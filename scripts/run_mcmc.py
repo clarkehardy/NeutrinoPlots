@@ -3,10 +3,10 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool,cpu_count
-from load_data import *
-from prob_funcs import *
-from util_funcs import *
-from plot_results import *
+from utils.load_data import *
+from utils.util_funcs import *
+from lobster.prob_funcs import *
+from lobster.plotting import *
 
 
 if __name__=='__main__':
@@ -101,7 +101,7 @@ if __name__=='__main__':
             samples_no = samples
             samples_io = None
 
-        fig,_ = lobster_plot(samples_no=samples_no,samples_io=samples_io,params=params)
+        fig,_ = density(samples_no=samples_no,samples_io=samples_io,params=params)
         fig.savefig(outdir+'lobster.png')
 
         print('Plot saved to {}'.format(outdir+'lobster.png'))

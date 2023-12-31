@@ -59,7 +59,7 @@ def get_3sigma_range(m_lightest,params,inverted=False,nsamples=1e4):
     return m_bb_lower,m_bb_upper
 
 
-def make_contours(params,inverted=False,npoints=100,nsamples=1e4):
+def get_contours(params,inverted=False,npoints=100,nsamples=1e4):
     '''
     Get the upper and lower contours for the 3sigma allowed regions.
     '''
