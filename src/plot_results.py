@@ -9,11 +9,14 @@ from contours import *
 style.use('clarke-default')
 
 
-def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None):
+def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,cmap='inferno'):
 
     # colorbar does not work well with tight_layout so
     # ensure that it is not enabled by default
     rcParams.update({'figure.autolayout': False})
+    x_bins = np.logspace(-5,0,nbins)
+    y_bins = np.logspace(-4,0,nbins)
+    vmax = 1e-12
 
     # sample from the posterior for normal ordering
     if samples_no is not None:
@@ -25,6 +28,14 @@ def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,param
                 continue
             ml_no.append(min(masses))
             mbb_no.append(model(theta))
+        # histogram the results and normalize by the log of the bin edges
+        h_no,x_edges,y_edges = np.histogram2d(ml_no,mbb_no,bins=(x_bins,y_bins))
+        x_diff = np.log(x_edges[1]/x_edges[0])
+        y_diff = np.log(y_edges[1]/y_edges[0])
+        h_no = h_no/(x_diff*y_diff*np.sum(h_no))
+        if np.amax(h_no)>vmax:
+            vmax = np.amax(h_no)
+        X,Y = np.meshgrid(x_edges,y_edges)
 
     # sample from the posterior for inverted ordering
     if samples_io is not None:
@@ -36,6 +47,14 @@ def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,param
                 continue
             ml_io.append(min(masses))
             mbb_io.append(model(theta))
+        # histogram the results and normalize by the log of the bin edges
+        h_io,x_edges,y_edges = np.histogram2d(ml_io,mbb_io,bins=(x_bins,y_bins))
+        x_diff = np.log(x_edges[1]/x_edges[0])
+        y_diff = np.log(y_edges[1]/y_edges[0])
+        h_io = h_io/(x_diff*y_diff*np.sum(h_io))
+        if np.amax(h_io)>vmax:
+            vmax = np.amax(h_io)
+        X,Y = np.meshgrid(x_edges,y_edges)
 
     if params is not None:
         m_lightest_no,m_lower_no,m_upper_no = make_contours(params,inverted=False,npoints=100,nsamples=1e4)
@@ -43,18 +62,15 @@ def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,param
 
     # make the plot
     fig,axs = plt.subplots(1,2,figsize=(10,5),constrained_layout=True)
-    x_bins = np.logspace(-5,0,nbins)
-    y_bins = np.logspace(-4,0,nbins)
-    if samples_no is not None:
-        h = axs[0].hist2d(ml_no,mbb_no,bins=(x_bins,y_bins),cmin=1,cmap='inferno',norm=LogNorm())
-    if samples_io is not None:
-        h = axs[1].hist2d(ml_io,mbb_io,bins=(x_bins,y_bins),cmin=1,cmap='inferno',norm=LogNorm())
-    labels = ['Normal ordering','Inverted ordering']
     if params is not None:
-        axs[0].plot(m_lightest_no,m_lower_no,'k')
-        axs[0].plot(m_lightest_no,m_upper_no,'k')
-        axs[1].plot(m_lightest_io,m_lower_io,'k')
-        axs[1].plot(m_lightest_io,m_upper_io,'k')
+        colors = plt.get_cmap(cmap)
+        axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.9)
+        axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.9)
+    if samples_no is not None:
+        im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap,norm=LogNorm(vmax=vmax))
+    if samples_io is not None:
+        im = axs[1].pcolormesh(X,Y,h_io.T,cmap=cmap,norm=LogNorm(vmax=vmax))
+    labels = ['Normal ordering','Inverted ordering']
     for i,ax in enumerate(axs):
         ax.text(2e-5,4e-1,labels[i])
         ax.set_yscale('log')
@@ -65,7 +81,7 @@ def lobster_plot(samples_no=None,samples_io=None,npoints=100_000,nbins=200,param
         ax.grid()
     axs[0].set_ylabel(r'$m_{\beta\beta}$ [eV]')
     axs[1].set_yticklabels([])
-    fig.suptitle('Marginalized posterior distributions')
-    fig.colorbar(h[3], ax=axs.ravel().tolist(),label='Probability density')
+    fig.suptitle('Marginalized posterior probability for the effective Majorana mass')
+    fig.colorbar(im, ax=axs.ravel().tolist(),label='Probability density')
 
     return fig,axs

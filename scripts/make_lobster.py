@@ -31,7 +31,7 @@ if __name__=='__main__':
     params = load_params()
 
     print('Making the plot...')
-    fig,axs = lobster_plot(samples_no=samples_no,samples_io=samples_io,nbins=nbins,npoints=npoints,params=params)
+    fig,axs = lobster_plot(samples_no=samples_no,samples_io=samples_io,nbins=nbins,npoints=npoints)
     fig.savefig(outfile)
     print('Figure saved to {}'.format(outfile))
 

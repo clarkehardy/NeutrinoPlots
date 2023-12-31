@@ -100,7 +100,7 @@ if __name__=='__main__':
             samples_no = samples
             samples_io = None
 
-        fig,_ = lobster_plot(samples_no=samples_no,samples_io=samples_io)
+        fig,_ = lobster_plot(samples_no=samples_no,samples_io=samples_io,params=params)
         fig.savefig(outdir+'lobster.png')
 
         print('Plot saved to {}'.format(outdir+'lobster.png'))

@@ -10,10 +10,10 @@ def get_3sigma_range(m_lightest,params,inverted=False,nsamples=1e4):
     '''
     
     # get the allowed ranges from the params dictionary
-    delta_m2_21_range = np.array(params['delta_m2_21'])[(2+2*inverted):]
-    delta_m2_23_range = np.array(params['delta_m2_23'])[(2+2*inverted):]
-    theta_12_range = np.array(params['theta_12'])[(2+2*inverted):]*np.pi/180.
-    theta_13_range = np.array(params['theta_13'])[(2+2*inverted):]*np.pi/180.
+    delta_m2_21_range = np.array(params['delta_m2_21'])[(2+2*inverted):(4+2*inverted)]
+    delta_m2_23_range = np.array(params['delta_m2_23'])[(2+2*inverted):(4+2*inverted)]
+    theta_12_range = np.array(params['theta_12'])[(2+2*inverted):(4+2*inverted)]*np.pi/180.
+    theta_13_range = np.array(params['theta_13'])[(2+2*inverted):(4+2*inverted)]*np.pi/180.
 
     # sample values from within the 3 sigma allowed region
     nsamples = int(nsamples)
@@ -46,7 +46,7 @@ def get_3sigma_range(m_lightest,params,inverted=False,nsamples=1e4):
         for i in range(nsamples):
             # compute the effective Majorana mass for the normal ordering
             m_2 = m2_no(m_lightest,delta_m2_21[i])
-            m_3 = m3_no(m_lightest,delta_m2_23[i],delta_m2_23[i])
+            m_3 = m3_no(m_lightest,delta_m2_21[i],delta_m2_23[i])
             m_betabeta = m_bb(m_lightest,m_2,m_3,np.sin(theta_12[i]),np.sin(theta_13[i]),\
                               np.cos(theta_12[i]),np.cos(theta_13[i]),alpha_21[i],delta_minus_alpha31[i])
             
