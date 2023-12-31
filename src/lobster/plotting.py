@@ -24,7 +24,8 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
     if samples_no is not None:
         ml_no = []
         mbb_no = []
-        for theta in samples_no[np.random.randint(len(samples_no), size=npoints)]:
+        print('Sampling the posterior distribution for normal ordering...')
+        for theta in tqdm(samples_no[np.random.randint(len(samples_no),size=npoints)]):
             masses,success = basis_change(*theta[:3])
             if success==False:
                 continue
@@ -43,7 +44,8 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
     if samples_io is not None:
         ml_io = []
         mbb_io = []
-        for theta in samples_io[np.random.randint(len(samples_io), size=npoints)]:
+        print('Sampling the posterior distribution for inverted ordering...')
+        for theta in tqdm(samples_io[np.random.randint(len(samples_io), size=npoints)]):
             masses,success = basis_change(*theta[:3])
             if success==False:
                 continue
@@ -59,19 +61,19 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
         X,Y = np.meshgrid(x_edges,y_edges)
 
     if params is not None:
-        m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=100,nsamples=1e4)
-        m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=100,nsamples=1e4)
+        m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=100,nsamples=1e5)
+        m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=100,nsamples=1e5)
 
     # make the plot
     fig,axs = plt.subplots(1,2,figsize=(10,5),constrained_layout=True)
     if params is not None:
         colors = plt.get_cmap(cmap)
-        axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.85)
-        axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.85)
+        axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.8)
+        axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.8)
     if samples_no is not None:
-        im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap,norm=LogNorm(vmax=vmax))
+        im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     if samples_io is not None:
-        im = axs[1].pcolormesh(X,Y,h_io.T,cmap=cmap,norm=LogNorm(vmax=vmax))
+        im = axs[1].pcolormesh(X,Y,h_io.T,cmap=cmap,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     labels = ['Normal ordering','Inverted ordering']
     for i,ax in enumerate(axs):
         ax.text(2e-5,4e-1,labels[i])
@@ -93,8 +95,8 @@ def vanilla(params,npoints=1e4,nsamples=200):
     Make the vanilla lobster plot showing the allowed regions.
     '''
 
-    m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=100,nsamples=1e4)
-    m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=100,nsamples=1e4)
+    m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=npoints,nsamples=nsamples)
+    m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=npoints,nsamples=nsamples)
 
     fig,ax = plt.subplots()
     ax.fill_between(m_lightest_no,m_lower_no,m_upper_no,color='red',alpha=0.5,label='Normal ordering')
