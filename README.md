@@ -24,6 +24,7 @@ python scripts/lobster_vanilla.py
 ```
 
 With the default number of points and samples, the script should run in under a minute but the lines may be jagged in places. The command line arguments `-npoints` and `-nsamples` can be used to make smoother lines. An example plot with 1e5 samples for each of 200 points is shown below.
+
 ![](figures/lobster_vanilla.png)
 
 ### Density Lobster Plot
@@ -47,6 +48,7 @@ python scripts/lobster_density.py samples_no_500000.npy samples_io_500000.npy
 ```
 
 This will produce a much lower quality version of the plot below. Increasing the number of walkers and iterations used by the MCMC will increase the plot quality.
+
 ![](figures/lobster_density.png)
 
 ## Data
