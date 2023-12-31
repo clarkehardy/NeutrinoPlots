@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm,LinearSegmentedColormap
 from matplotlib import rcParams
 from matplotlib import style
 import numpy as np
@@ -68,12 +68,15 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
     fig,axs = plt.subplots(1,2,figsize=(10,5),constrained_layout=True)
     if params is not None:
         colors = plt.get_cmap(cmap)
+        cmap_reduced = LinearSegmentedColormap.from_list('',colors(np.linspace(0.25,1,1000)))
         axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.8)
+        axs[0].fill_between(m_lightest_no[5:-5],1.5*m_upper_no[5:-5],0.7,color=axs[0].get_facecolor(),zorder=98)
         axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.8)
+        axs[1].fill_between(m_lightest_io[5:-5],1.5*m_upper_io[5:-5],0.7,color=axs[1].get_facecolor(),zorder=99)
     if samples_no is not None:
-        im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
+        im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap_reduced,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     if samples_io is not None:
-        im = axs[1].pcolormesh(X,Y,h_io.T,cmap=cmap,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
+        im = axs[1].pcolormesh(X,Y,h_io.T,cmap=cmap_reduced,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     labels = ['Normal ordering','Inverted ordering']
     for i,ax in enumerate(axs):
         ax.text(2e-5,4e-1,labels[i])

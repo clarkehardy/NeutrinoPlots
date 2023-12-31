@@ -45,7 +45,7 @@ python run_mcmc.py -io
 Once both sample chains have been saved, the script to produce the lobster plot can be run with the paths to the saved sample chains as command line arguments. If the scripts were run as above, then the following should work to make the plot:
 
 ```bash
-python lobster_density.py samples_no_500000.npy samples_io_500000.npy
+python lobster_density.py samples_no_500000.npy samples_io_500000.npy -allowed
 ```
 
 This will produce a much lower quality version of the plot below. Increasing the number of walkers and iterations used by the MCMC will increase the plot quality.
