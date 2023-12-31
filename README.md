@@ -12,7 +12,7 @@ pip install -e .
 ```
 During this step the dependencies listed in [requirements.txt](requirements.txt) will be automatically installed. For this reason it is recommended to install the package in a virtual p ython environment using `venv`, `virtualenv`, or `conda`. To uninstall, run:
 ```bash
-pip uninstall neutrino-plots
+pip uninstall neutrinoplots
 ```
 
 ## Usage
