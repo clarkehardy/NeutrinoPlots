@@ -2,7 +2,7 @@
 
 ## About
 
-This package is intended to enable the user to easily reproduce some of the typical plots used in neutrino physics for papers, theses, or talks. Currently, code has been implemented to reproduce the "Lobster Plot," with the option to show the probability density in the parameter space in addition to the usual 3&sigma; contours. This is done using a Markov Chain Monte Carlo (MCMC) to sample the marginalized posterior distribution of the effective Majorana mass, as described in Ref. \[1\].
+This package is intended to enable the user to easily reproduce some of the typical plots used in neutrino physics for papers, theses, or talks. Currently, code has been implemented to reproduce the "lobster plot," with the option to show the probability density in the parameter space in addition to the usual 3&sigma; contours. This is done using a Markov Chain Monte Carlo (MCMC) to sample the marginalized posterior distribution of the effective Majorana mass, as described in Ref. \[1\].
 
 ## Installation
 
@@ -20,7 +20,8 @@ pip uninstall neutrino-plots
 After installation, the code should work right out of the box to produce the "vanilla" lobster plot, showing only the 3&sigma; allowed region. This can be done by running:
 
 ```bash
-python scripts/lobster_vanilla.py
+cd scripts
+python lobster_vanilla.py
 ```
 
 With the default number of points and samples, the script should run in under a minute but the lines may be jagged in places. The command line arguments `-npoints` and `-nsamples` can be used to make smoother lines. An example plot with 1e5 samples for each of 200 points is shown below.
@@ -32,19 +33,19 @@ With the default number of points and samples, the script should run in under a 
 Before running the script to make the density lobster plot, the MCMC must first be run to produce the sample chains. This can be done using:
 
 ```bash
-python scripts/run_mcmc.py
+python run_mcmc.py
 ```
 
 This will produce the chains with the default number of samples for normal ordering. To get the sample chains for inverted ordering, run:
 
 ```bash
-python scripts/run_mcmc.py -io
+python run_mcmc.py -io
 ```
 
 Once both sample chains have been saved, the script to produce the lobster plot can be run with the paths to the saved sample chains as command line arguments. If the scripts were run as above, then the following should work to make the plot:
 
 ```bash
-python scripts/lobster_density.py samples_no_500000.npy samples_io_500000.npy
+python lobster_density.py samples_no_500000.npy samples_io_500000.npy
 ```
 
 This will produce a much lower quality version of the plot below. Increasing the number of walkers and iterations used by the MCMC will increase the plot quality.
