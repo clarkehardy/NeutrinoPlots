@@ -63,6 +63,9 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
     if params is not None:
         m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=100,nsamples=1e5)
         m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=100,nsamples=1e5)
+        # points above the allowed region occasionally leak in and can be removed
+        mask_no = Y[1:,1:].T < 1.5*np.interp(X[1:,1:].T,m_lightest_no,m_upper_no)
+        mask_io = Y[1:,1:].T < 1.5*np.interp(X[1:,1:].T,m_lightest_io,m_upper_io)
 
     # make the plot
     fig,axs = plt.subplots(1,2,figsize=(10,5),constrained_layout=True)
@@ -70,12 +73,12 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
         colors = plt.get_cmap(cmap)
         cmap_reduced = LinearSegmentedColormap.from_list('',colors(np.linspace(0.25,1,1000)))
         axs[0].fill_between(m_lightest_no,m_lower_no,m_upper_no,color=colors(0),alpha=0.8)
-        axs[0].fill_between(m_lightest_no[5:-5],1.5*m_upper_no[5:-5],0.7,color=axs[0].get_facecolor(),zorder=98)
         axs[1].fill_between(m_lightest_io,m_lower_io,m_upper_io,color=colors(0),alpha=0.8)
-        axs[1].fill_between(m_lightest_io[5:-5],1.5*m_upper_io[5:-5],0.7,color=axs[1].get_facecolor(),zorder=99)
     if samples_no is not None:
+        h_no[~mask_no] = 0
         im = axs[0].pcolormesh(X,Y,h_no.T,cmap=cmap_reduced,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     if samples_io is not None:
+        h_io[~mask_io] = 0
         im = axs[1].pcolormesh(X,Y,h_io.T,cmap=cmap_reduced,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     labels = ['Normal ordering','Inverted ordering']
     for i,ax in enumerate(axs):
