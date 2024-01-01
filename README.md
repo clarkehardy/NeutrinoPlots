@@ -53,7 +53,7 @@ This will produce a much lower quality version of the plot below. Increasing the
 ![](figures/lobster_density.png)
 
 ## Data
-The vanilla Lobster plot requires only the 3&sigma; ranges of the oscillation parameters. These are included in [data/params.yaml](data/params.yaml). Also included in that file are the phase-space factor and ab-initio nuclear matrix element for <sup>136</sup>Xe and the axial-vector coupling constant. The latter three are used only to produce the density plot.
+The vanilla lobster plot requires only the 3&sigma; ranges of the oscillation parameters. These are included in [data/params.yaml](data/params.yaml). Also included in that file are the phase-space factor and ab-initio nuclear matrix element for <sup>136</sup>Xe and the axial-vector coupling constant. The latter three are used only to produce the density plot.
 
 To produce the density plot, &Delta;&chi;<sup>2</sup> curves are required for some of the physical observables. The data for the oscillation parameters is available for download from [NuFIT 5.2 (2022), www.nu-fit.org](www.nu-fit.org) \[2\]. The specific files required can be found in [src/utils/load_data](src/utils/load_data). Limits are also required on the effective electron neutrino mass and the effective Majorana mass. The code currently uses data from KATRIN and KamLAND-Zen for these respectively. The required data is included as supplemental material with Refs. \[3\] and \[4\]. All of these files should be put in the [data](data) directory.
 
