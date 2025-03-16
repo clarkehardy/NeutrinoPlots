@@ -1,19 +1,24 @@
 import argparse
 import numpy as np
+import matplotlib.pyplot as plt
+# my default plot style (not available unless manually installed)
+try:
+    plt.style.use('clarke-default')
+except:
+    pass
 from lobster.plotting import *
 from utils.load_data import *
 
 
 if __name__=='__main__':
-    '''
-    Make the lobster density plot.
-    '''
+    """Make the vanilla lobster plot.
+    """
 
     # command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-npoints',type=int,default=200)
-    parser.add_argument('-nsamples',type=float,default=1e4)
-    parser.add_argument('-outfile',type=str,default='')
+    parser.add_argument('--npoints',type=int,default=200)
+    parser.add_argument('--nsamples',type=float,default=1e4)
+    parser.add_argument('--outfile',type=str,default='')
     args = parser.parse_args()
     npoints = args.npoints
     nsamples = args.nsamples

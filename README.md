@@ -24,7 +24,7 @@ cd scripts
 python lobster_vanilla.py
 ```
 
-With the default number of points and samples, the script should run in under a minute but the lines may be jagged in places. The command line arguments `-npoints` and `-nsamples` can be used to make smoother lines. An example plot with 1e5 samples for each of 200 points is shown below.
+With the default number of points and samples, the script should run in under a minute but the lines may be jagged in places. The command line arguments `--npoints` and `--nsamples` can be used to make smoother lines. An example plot with 1e5 samples for each of 200 points is shown below.
 
 ![](figures/lobster_vanilla.png)
 
@@ -39,13 +39,13 @@ python run_mcmc.py
 This will produce the chains with the default number of samples for normal ordering. To get the sample chains for inverted ordering, run:
 
 ```bash
-python run_mcmc.py -io
+python run_mcmc.py --io
 ```
 
 Once both sample chains have been saved, the script to produce the lobster plot can be run with the paths to the saved sample chains as command line arguments. If the scripts were run as above, then the following should work to make the plot:
 
 ```bash
-python lobster_density.py samples_no_500000.npy samples_io_500000.npy -allowed
+python lobster_density.py samples_no_500000.npy samples_io_500000.npy --allowed
 ```
 
 This will produce a much lower quality version of the plot below. Increasing the number of walkers and iterations used by the MCMC will increase the plot quality.
@@ -53,7 +53,7 @@ This will produce a much lower quality version of the plot below. Increasing the
 ![](figures/lobster_density.png)
 
 ## Data
-The vanilla Lobster plot requires only the 3&sigma; ranges of the oscillation parameters. These are included in [data/params.yaml](data/params.yaml). Also included in that file are the phase-space factor and ab-initio nuclear matrix element for <sup>136</sup>Xe and the axial-vector coupling constant. The latter three are used only to produce the density plot.
+The vanilla Lobster plot requires only the 3&sigma; ranges of the oscillation parameters. These are included in [data/params.yaml](data/params.yaml). Also included in that file are the phase-space factor and ab-initio nuclear matrix element for <sup>136</sup>Xe and the axial-vector coupling constant. The last three are used only to produce the density plot.
 
 To produce the density plot, &Delta;&chi;<sup>2</sup> curves are required for some of the physical observables. The data for the oscillation parameters is available for download from [NuFIT 5.2 (2022), www.nu-fit.org](www.nu-fit.org) \[2\]. The specific files required can be found in [src/utils/load_data](src/utils/load_data). Limits are also required on the effective electron neutrino mass and the effective Majorana mass. The code currently uses data from KATRIN and KamLAND-Zen for these respectively. The required data is included as supplemental material with Refs. \[3\] and \[4\]. All of these files should be put in the [data](data) directory.
 
