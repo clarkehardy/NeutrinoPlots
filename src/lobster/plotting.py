@@ -7,7 +7,11 @@ from scipy.stats import gaussian_kde
 from utils.util_funcs import *
 from lobster.prob_funcs import *
 from lobster.contours import *
-style.use('clarke-default')
+# my default plot style (not available unless manually installed)
+try:
+    style.use('clarke-default')
+except:
+    pass
 
 
 def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,\
