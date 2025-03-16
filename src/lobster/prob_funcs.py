@@ -1,4 +1,3 @@
-from scipy.optimize import root
 from utils.load_data import *
 from utils.util_funcs import *
 
