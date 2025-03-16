@@ -1,3 +1,5 @@
 *.npy
 *.png
+*.npz
+*.txt
 __pycache__
