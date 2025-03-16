@@ -10,7 +10,7 @@ The package can be installed by running the following from the top-level directo
 ```bash
 pip install -e .
 ```
-During this step the dependencies listed in [requirements.txt](requirements.txt) will be automatically installed. For this reason it is recommended to install the package in a virtual p ython environment using `venv`, `virtualenv`, or `conda`. To uninstall, run:
+During this step the dependencies listed in [requirements.txt](requirements.txt) will be automatically installed. For this reason it is recommended to install the package in a virtual python environment using `venv`, `virtualenv`, or `conda`. To uninstall, run:
 ```bash
 pip uninstall neutrinoplots
 ```
@@ -55,7 +55,7 @@ This will produce a much lower quality version of the plot below. Increasing the
 ## Data
 The vanilla Lobster plot requires only the 3&sigma; ranges of the oscillation parameters. These are included in [data/params.yaml](data/params.yaml). Also included in that file are the phase-space factor and ab-initio nuclear matrix element for <sup>136</sup>Xe and the axial-vector coupling constant. The last three are used only to produce the density plot.
 
-To produce the density plot, &Delta;&chi;<sup>2</sup> curves are required for some of the physical observables. The data for the oscillation parameters is available for download from [NuFIT 5.2 (2022), www.nu-fit.org](www.nu-fit.org) \[2\]. The specific files required can be found in [src/utils/load_data](src/utils/load_data). Limits are also required on the effective electron neutrino mass and the effective Majorana mass. The code currently uses data from KATRIN and KamLAND-Zen for these respectively. The required data is included as supplemental material with Refs. \[3\] and \[4\]. All of these files should be put in the [data](data) directory.
+To produce the density plot, &Delta;&chi;<sup>2</sup> curves are required for some of the physical observables. The data for the oscillation parameters is available for download from [NuFIT 5.2 (2022), www.nu-fit.org](www.nu-fit.org) \[2\]. The specific files required can be found in [src/utils/load_data](src/utils/load_data). Limits are also required on the effective electron neutrino mass and the effective Majorana mass. The code currently uses data from KATRIN and KamLAND-Zen for these, respectively. The required data is included as supplemental material with Refs. \[3\] and \[4\]. All of these files should be put in the [data](data) directory.
 
 ## License
 
