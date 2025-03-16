@@ -1,17 +1,11 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm,LinearSegmentedColormap
 from matplotlib import rcParams
-from matplotlib import style
 import numpy as np
 from scipy.stats import gaussian_kde
 from utils.util_funcs import *
 from lobster.prob_funcs import *
 from lobster.contours import *
-# my default plot style (not available unless manually installed)
-try:
-    style.use('clarke-default')
-except:
-    pass
 
 
 def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,\
@@ -100,20 +94,24 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
         mask_io = np.ones(h_no.shape, dtype=bool)
 
     if data_save_path:
-        if not data_save_path.endswith('.npy'):
-            data_save_path = data_save_path + '.npy'
-        to_save_list = []
+        if not data_save_path.endswith('.npz'):
+            data_save_path = data_save_path + '.npz'
+        save_dict = {}
         if samples_no is not None or samples_io is not None:
-            to_save_list.append(X)
-            to_save_list.append(Y)
+            save_dict['m_lightest'] = X
+            save_dict['m_betabeta'] = Y
         if samples_no is not None:
-            to_save_list.append(h_no)
+            save_dict['prob_no'] = h_no
         if samples_io is not None:
-            to_save_list.append(h_io)
+            save_dict['prob_io'] = h_io
         if params is not None:
-            to_save_list.extend([m_lightest_no, m_lower_no, m_upper_no, m_lower_io, m_lower_io])
-        to_save = np.vstack(to_save_list)
-        np.save(data_save_path, to_save)
+            save_dict.update({'m_lightest_no': m_lightest_no,
+                              'm_lower_no': m_lower_no,
+                              'm_upper_no': m_upper_no,
+                              'm_lightest_io': m_lightest_io,
+                              'm_lower_io': m_lower_io,
+                              'm_upper_io': m_upper_io})
+        np.savez(data_save_path, **save_dict)
         print('Plot data saved to ' + data_save_path)
 
     # make the plot
