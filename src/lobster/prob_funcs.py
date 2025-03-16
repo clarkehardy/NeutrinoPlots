@@ -4,10 +4,9 @@ from utils.util_funcs import *
 
 
 def lnlike(theta,chi2_funcs,params,ln_prior):
-    '''
-    Log-likehood function based on experimental data from oscillations and limits on the effective
+    """Log-likehood function based on experimental data from oscillations and limits on the effective
     electron antineutrino mass and the effective Majorana mass.
-    '''
+    """
 
     # if the prior is negative infinity, don't bother computing the likelihoods
     if np.isneginf(ln_prior):
@@ -41,10 +40,9 @@ def lnlike(theta,chi2_funcs,params,ln_prior):
 
 
 def lnprior(theta,inverted):
-    '''
-    Log-prior on the parameters. Priors are taken to be scale-invariant, i.e. uniform on [0,2*pi]
+    """Log-prior on the parameters. Priors are taken to be scale-invariant, i.e. uniform on [0,2*pi]
     for angles and log-uniform for masses.
-    '''
+    """
     
     sigma,delta_m2_21,delta_m2_23,_,_,_,_ = theta
 
@@ -53,6 +51,13 @@ def lnprior(theta,inverted):
             return -np.inf
         
     if sigma<0 or delta_m2_21<0 or (delta_m2_23*(inverted-0.5))<0:
+        return -np.inf
+    
+    # make sure none of the masses are zero
+    masses,success = basis_change(sigma,delta_m2_21,delta_m2_23)
+    if success is False:
+        return -np.inf
+    if np.any(masses < 0):
         return -np.inf
     
     prior_sigma = -np.log(sigma)
@@ -65,9 +70,8 @@ def lnprior(theta,inverted):
 
 
 def lnprob(theta,inverted,chi2_funcs,params):
-    '''
-    Function to be passed to the MCMC sampler.
-    '''
+    """Function to be passed to the MCMC sampler.
+    """
 
     lp = lnprior(theta,inverted)
     ll = lnlike(theta,chi2_funcs,params,lp)
