@@ -2,4 +2,5 @@
 *.png
 *.npz
 *.txt
+*.egg-info
 __pycache__
