@@ -1,33 +1,59 @@
 import numpy as np
-from scipy.optimize import root
+from scipy.optimize import root_scalar
 
 
-def basis_change(sigma,dm2_21,dm2_23):
-    """Finds the 3 individual neutrino masses given the sum and mass squared differences.
+def basis_change(sigma, dm2_21, dm2_23):
+    """Finds the 3 individual neutrino masses given the sum of masses and two
+    mass-squared differences. Determines hierarchy based on the sign of dm2_23.
     """
-    
-    # function whose roots give the individual neutrino masses
-    func = lambda m: [m[0]+m[1]+m[2]-sigma,m[1]**2-m[0]**2-dm2_21,m[1]**2-m[2]**2-dm2_23]
+    if dm2_23 > 0:
+        def residual(m1):
+            try:
+                m2 = np.sqrt(m1**2 + dm2_21)
+                m3 = np.sqrt(m2**2 + dm2_23)
+                return m1 + m2 + m3 - sigma
+            except ValueError:
+                return np.inf
 
-    # try to find the roots with a naive guess
-    sol = root(func,x0=[1e-1]*3,tol=1e-12)
-    masses = sol.x
-    success = sol.success
+        a, b = 1e-6, sigma
+        fa, fb = residual(a), residual(b)
+        if fa * fb > 0:
+            return np.array([np.nan, np.nan, np.nan]), False
 
-    # if that doesn't work, randomly adjust the guess until the roots are found or
-    # the maximum number of iterations is exceeded (grid search or something more
-    # sensible hasn't worked for me)
-    iters = 0
-    while success==False:
-        sol = root(func,x0=np.random.normal(loc=1e-1,scale=5e-2,size=3),tol=1e-12)
-        masses = sol.x
-        success = sol.success
-        iters += 1
-        if iters>1e3:
-            print('Failed to find roots of basis change function.')
-            break
+        result = root_scalar(residual, bracket=[a, b], method='brentq')
+        if not result.converged:
+            return np.array([np.nan, np.nan, np.nan]), False
 
-    return masses,success
+        m1 = result.root
+        m2 = np.sqrt(m1**2 + dm2_21)
+        m3 = np.sqrt(m2**2 + dm2_23)
+        return np.array([m1, m2, m3]), True
+
+    elif dm2_23 < 0:
+        def residual(m3):
+            try:
+                m2 = np.sqrt(m3**2 - dm2_23)
+                m1 = np.sqrt(m2**2 - dm2_21)
+                return m1 + m2 + m3 - sigma
+            except ValueError:
+                return np.inf
+
+        a, b = 1e-6, sigma
+        fa, fb = residual(a), residual(b)
+        if fa * fb > 0:
+            return np.array([np.nan, np.nan, np.nan]), False
+
+        result = root_scalar(residual, bracket=[a, b], method='brentq')
+        if not result.converged:
+            return np.array([np.nan, np.nan, np.nan]), False
+
+        m3 = result.root
+        m2 = np.sqrt(m3**2 - dm2_23)
+        m1 = np.sqrt(m2**2 - dm2_21)
+        return np.array([m1, m2, m3]), True
+
+    else:
+        return np.array([np.nan, np.nan, np.nan]), False
 
 
 def m_b(m1,m2,m3,s12,s13,c12,c13):
