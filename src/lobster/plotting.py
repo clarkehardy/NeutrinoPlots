@@ -148,22 +148,31 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
     return fig,axs
 
 
-def vanilla(params,npoints=1e4,nsamples=200):
-    """Make the vanilla lobster plot showing the allowed regions.
+def vanilla(params, npoints=200, nsamples=1e4, sum=False):
+    """Make the vanilla lobster plot showing the allowed regions, with the
+    x-axis showing either the lightest mass or the sum of masses.
     """
 
-    m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=npoints,nsamples=nsamples)
-    m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=npoints,nsamples=nsamples)
+    m_lightest_no,m_lower_no,m_upper_no = get_contours(params, inverted=False, npoints=npoints, \
+                                                       nsamples=nsamples, sum=sum)
+    m_lightest_io,m_lower_io,m_upper_io = get_contours(params, inverted=True, npoints=npoints, \
+                                                       nsamples=nsamples, sum=sum)
 
     fig,ax = plt.subplots()
-    ax.fill_between(m_lightest_no,m_lower_no,m_upper_no,color='red',alpha=0.5,label='Normal ordering')
-    ax.fill_between(m_lightest_io,m_lower_io,m_upper_io,color='blue',alpha=0.5,label='Inverted ordering')
+    ax.fill_between(m_lightest_no,m_lower_no,m_upper_no,color='red',alpha=0.5,lw=0,\
+                    label='Normal ordering')
+    ax.fill_between(m_lightest_io,m_lower_io,m_upper_io,color='blue',alpha=0.5,lw=0,\
+                    label='Inverted ordering')
     ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylim([1e-4,1e0])
     ax.set_xlim([1e-5,1e0])
     ax.set_ylabel(r'$m_{\beta\beta}$ [eV]')
     ax.set_xlabel(r'$m_\mathrm{lightest}$ [eV]')
+    if sum:
+        ax.set_ylim([1e-4,1e0])
+        ax.set_xlim([5e-2,1e0])
+        ax.set_xlabel(r'$\Sigma$ [eV]')
     ax.set_title(r'3$\sigma$ allowed regions for the effective Majorana mass')
     ax.legend(loc='upper left')
 
