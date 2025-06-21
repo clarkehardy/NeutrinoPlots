@@ -102,18 +102,18 @@ def density(samples_no=None, samples_io=None, npoints=100_000, nbins=200, params
         if not data_save_path.endswith('.npz'):
             data_save_path = data_save_path + '.npz'
         save_dict = {}
+        if sum:
+            m_label = 'sigma'
+        else:
+            m_label = 'm_lightest'
         if samples_no is not None or samples_io is not None:
-            save_dict['m_lightest'] = X
+            save_dict[m_label] = X
             save_dict['m_betabeta'] = Y
         if samples_no is not None:
             save_dict['prob_no'] = h_no
         if samples_io is not None:
             save_dict['prob_io'] = h_io
         if params is not None:
-            if sum:
-                m_label = 'sigma'
-            else:
-                m_label = 'm_lightest'
             save_dict.update({m_label + '_no': m_lightest_no,
                               'm_lower_no': m_lower_no,
                               'm_upper_no': m_upper_no,
