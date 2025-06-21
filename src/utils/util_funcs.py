@@ -6,11 +6,11 @@ def basis_change(sigma, dm2_21, dm2_23):
     """Finds the 3 individual neutrino masses given the sum of masses and two
     mass-squared differences. Determines hierarchy based on the sign of dm2_23.
     """
-    if dm2_23 > 0:
+    if dm2_23 < 0:
         def residual(m1):
             try:
                 m2 = np.sqrt(m1**2 + dm2_21)
-                m3 = np.sqrt(m2**2 + dm2_23)
+                m3 = np.sqrt(m2**2 - dm2_23)
                 return m1 + m2 + m3 - sigma
             except ValueError:
                 return np.inf
@@ -26,13 +26,13 @@ def basis_change(sigma, dm2_21, dm2_23):
 
         m1 = result.root
         m2 = np.sqrt(m1**2 + dm2_21)
-        m3 = np.sqrt(m2**2 + dm2_23)
+        m3 = np.sqrt(m2**2 - dm2_23)
         return np.array([m1, m2, m3]), True
 
-    elif dm2_23 < 0:
+    elif dm2_23 > 0:
         def residual(m3):
             try:
-                m2 = np.sqrt(m3**2 - dm2_23)
+                m2 = np.sqrt(m3**2 + dm2_23)
                 m1 = np.sqrt(m2**2 - dm2_21)
                 return m1 + m2 + m3 - sigma
             except ValueError:
@@ -48,7 +48,7 @@ def basis_change(sigma, dm2_21, dm2_23):
             return np.array([np.nan, np.nan, np.nan]), False
 
         m3 = result.root
-        m2 = np.sqrt(m3**2 - dm2_23)
+        m2 = np.sqrt(m3**2 + dm2_23)
         m1 = np.sqrt(m2**2 - dm2_21)
         return np.array([m1, m2, m3]), True
 
