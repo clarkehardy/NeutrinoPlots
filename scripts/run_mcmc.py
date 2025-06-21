@@ -29,7 +29,7 @@ if __name__=='__main__':
     outdir = args.outdir
     plot = args.plot
     filename = 'samples_{}_{}.npy'.format(['no','io'][inverted],nwalkers*niter)
-    if outdir!='':
+    if outdir != '':
         outdir = outdir + '/'
         filename = outdir + filename
     np.seterr(invalid='ignore')

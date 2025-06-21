@@ -24,6 +24,7 @@ if __name__=='__main__':
     parser.add_argument('--data-path',type=str,default='')
     parser.add_argument('--allowed',action='store_true',default=False)
     parser.add_argument('--kde',action='store_true',default=False)
+    parser.add_argument('--sum',action='store_true',default=False)
     args = parser.parse_args()
     path_no = args.path_no
     path_io = args.path_io
@@ -33,6 +34,7 @@ if __name__=='__main__':
     data_path = args.data_path
     allowed = args.allowed
     kde = args.kde
+    sum = args.sum
     if outfile=='':
         outfile = 'lobster_density.png'
     if data_path == '':
@@ -49,7 +51,7 @@ if __name__=='__main__':
         params = None
 
     print('Making the plot...')
-    fig,axs = density(samples_no=samples_no,samples_io=samples_io,nbins=nbins,npoints=npoints,\
-                      params=params,style=style,cmap='inferno',data_save_path=data_path)
+    fig,axs = density(samples_no=samples_no, samples_io=samples_io, nbins=nbins, npoints=npoints,\
+                      params=params, style=style, sum=sum, cmap='magma_r', data_save_path=data_path)
     fig.savefig(outfile)
     print('Figure saved to {}'.format(outfile))

@@ -8,19 +8,24 @@ from lobster.prob_funcs import *
 from lobster.contours import *
 
 
-def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=None,\
-            style='hist',cmap='magma_r',data_save_path=None):
+def density(samples_no=None, samples_io=None, npoints=100_000, nbins=200, params=None,\
+            sum=False, style='hist', cmap='magma_r', data_save_path=None):
     """Make the lobster plot showing the probability density in the allowed regions.
     """
     if style not in ['hist', 'kde']:
         print('Error: plotting style not recognized!')
         return
+    
+    if sum:
+        func = np.sum
+    else:
+        func = np.amin
 
     # colorbar does not work well with tight_layout so
     # ensure that it is not enabled by default
     rcParams.update({'figure.autolayout': False})
-    x_bins = np.logspace(-5,0,nbins + 1)
-    y_bins = np.logspace(-4,0,nbins + 1)
+    x_bins = np.logspace([-5, np.log10(5e-2)][int(sum)], 0, nbins + 1)
+    y_bins = np.logspace(-4, 0, nbins + 1)
     X,Y = np.meshgrid(x_bins[1:], y_bins[1:])
     vmax = 1e-12
 
@@ -33,7 +38,7 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
             masses,success = basis_change(*theta[:3])
             if success==False:
                 continue
-            ml_no.append(min(masses))
+            ml_no.append(func(masses))
             mbb_no.append(model(theta))
         ml_no = np.array(ml_no)
         if np.any(ml_no < 0):
@@ -63,7 +68,7 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
             masses,success = basis_change(*theta[:3])
             if success==False:
                 continue
-            ml_io.append(min(masses))
+            ml_io.append(func(masses))
             mbb_io.append(model(theta))
         ml_io = np.array(ml_io)
         if np.any(ml_io < 0):
@@ -85,8 +90,8 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
             vmax = np.amax(h_io)
 
     if params is not None:
-        m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=nbins,nsamples=1e5)
-        m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=nbins,nsamples=1e5)
+        m_lightest_no,m_lower_no,m_upper_no = get_contours(params,inverted=False,npoints=nbins,nsamples=1e5,sum=sum)
+        m_lightest_io,m_lower_io,m_upper_io = get_contours(params,inverted=True,npoints=nbins,nsamples=1e5,sum=sum)
         mask_no = (Y <= np.interp(X,m_lightest_no,m_upper_no)) & (Y >= np.interp(X,m_lightest_no,m_lower_no))
         mask_io = (Y <= np.interp(X,m_lightest_io,m_upper_io)) & (Y >= np.interp(X,m_lightest_io,m_lower_io))
     else:
@@ -105,10 +110,14 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
         if samples_io is not None:
             save_dict['prob_io'] = h_io
         if params is not None:
-            save_dict.update({'m_lightest_no': m_lightest_no,
+            if sum:
+                m_label = 'sigma'
+            else:
+                m_label = 'm_lightest'
+            save_dict.update({m_label + '_no': m_lightest_no,
                               'm_lower_no': m_lower_no,
                               'm_upper_no': m_upper_no,
-                              'm_lightest_io': m_lightest_io,
+                              m_label + '_io': m_lightest_io,
                               'm_lower_io': m_lower_io,
                               'm_upper_io': m_upper_io})
         np.savez(data_save_path, **save_dict)
@@ -133,12 +142,17 @@ def density(samples_no=None,samples_io=None,npoints=100_000,nbins=200,params=Non
         im = axs[1].pcolormesh(X,Y,h_io,cmap=cmap_reduced,norm=LogNorm(vmin=10**(np.log10(vmax)-3),vmax=vmax))
     labels = ['Normal ordering','Inverted ordering']
     for i,ax in enumerate(axs):
-        ax.text(2e-5,4e-1,labels[i])
         ax.set_yscale('log')
         ax.set_xscale('log')
-        ax.set_xlabel(r'$m_{{{}}}$ [eV]'.format(2*i+1))
+        if sum:
+            ax.text(6e-2,4e-1,labels[i])
+            ax.set_xlabel(r'$\Sigma$ [eV]')
+            ax.set_xlim([5e-2,1])
+        else:
+            ax.text(2e-5,4e-1,labels[i])
+            ax.set_xlabel(r'$m_{{{}}}$ [eV]'.format(2*i+1))
+            ax.set_xlim([1e-5,1])
         ax.set_ylim([1e-4,1])
-        ax.set_xlim([1e-5,1])
     axs[0].set_ylabel(r'$m_{\beta\beta}$ [eV]')
     axs[1].set_yticklabels([])
     fig.suptitle('Marginalized posterior probability for the effective Majorana mass')
