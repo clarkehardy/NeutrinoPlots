@@ -3,8 +3,8 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool,cpu_count
-from utils.load_data import *
-from utils.util_funcs import *
+from nuplots.load_data import *
+from nuplots.utils import *
 from lobster.prob_funcs import *
 from lobster.plotting import *
 

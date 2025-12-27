@@ -1,0 +1,448 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+from matplotlib.lines import Line2D
+from matplotlib import color_sequences
+import feynman
+from nuplots.load_data import load_params
+from nuplots.utils import CompositePatch, HandlerCompositePatch, get_pmns_matrix
+
+def oscillation():
+    pass
+
+def mass_ordering(params, save_path=None):
+    colors = color_sequences['tab10']
+    nu_colors = [colors[3], colors[8], colors[0]]
+
+    # mass-squared differences are not plotted to scale
+    dm2_sol = 1
+    dm2_atm = 6
+    U_PMNS = get_pmns_matrix(params)
+    U_inv = np.conj(U_PMNS).T
+    m2_1 = np.abs(U_inv[:,0])**2
+    m2_2 = np.abs(U_inv[:,1])**2
+    m2_3 = np.abs(U_inv[:,2])**2
+    no_states = np.array((0, dm2_sol, dm2_sol + dm2_atm))
+    io_states = np.array((0, dm2_atm, dm2_atm + dm2_sol))
+    mass_labels = np.array(['$m_1^2$', '$m_2^2$', '$m_3^2$'])
+    ordering_labels = ['Normal ordering', 'Inverted ordering']
+    mass_states = [m2_1, m2_2, m2_3]
+    states = [no_states, io_states]
+    indices = [np.arange(3), np.array((2, 0, 1))]
+    arrow_pos = 0.5
+    shrink = 5
+    height = 0.2
+    fontsize = plt.rcParams['font.size']
+
+    fig, ax = plt.subplots(1, 2, figsize=(4, 4), layout='constrained')
+    for i in range(2):
+        ax[i].barh(states[i], m2_1[indices[i]], height=height, color=nu_colors[0], label=r'$\nu_e$')
+        ax[i].barh(states[i], m2_2[indices[i]], left=m2_1[indices[i]], height=height, color=nu_colors[1], label=r'$\nu_\mu$')
+        ax[i].barh(states[i], m2_3[indices[i]], left=m2_1[indices[i]] + m2_2[indices[i]], height=height, color=nu_colors[2], label=r'$\nu_\tau$')
+        ax[i].set_yticks(states[i])
+        ax[i].set_yticklabels(mass_labels[indices[i]], fontsize=fontsize)
+        for j in range(2):
+            ax[i].annotate('', xy=(arrow_pos, states[i][j + 0]), xytext=(arrow_pos, states[i][j + 1]), \
+                        arrowprops=dict(arrowstyle='<->', color='black', mutation_scale=8, shrinkA=shrink, shrinkB=shrink))
+        ax[i].text(arrow_pos + 0.05, (states[i][i+0] + states[i][i+1])/2, \
+                r'$\Delta m^2_\mathrm{sol}$', va='center', fontsize=fontsize)
+        ax[i].text(arrow_pos + 0.05, (states[i][1-i] + states[i][2-i])/2, \
+                r'$\Delta m^2_\mathrm{atm}$', va='center', fontsize=fontsize)
+        ax[i].spines['top'].set_visible(False)
+        ax[i].spines['right'].set_visible(False)
+        ax[i].spines['bottom'].set_visible(False)
+        ax[i].spines['left'].set_visible(False)
+        ax[i].tick_params(axis='both', length=0)
+        ax[i].set_xticks([])
+        ax[i].set_xlabel(ordering_labels[i], fontsize=fontsize)
+    ax[1].legend(frameon=False, handlelength=0.8, loc=[-0.2, 0.4], fontsize=fontsize)
+
+    if save_path:
+        fig.savefig(save_path)
+
+def mass_scale():
+    pass
+
+def spinors(creation=False, save_path=None):
+    """Make a plot showing the chiral composition of neutrino helicity states.
+
+    :param creation: whether to consider state creation, defaults to False
+    :type creation: bool, optional
+    :param save_path: path where the figure should be saved
+    :type save_path: str, optional
+    """
+
+    # define position and size parameters
+    h_supp_factor = 0.1
+    width = 1.6
+    x_left = 0.4
+    x_mid = 2.2
+    x_right = 4.0
+    y_dirac = 2.3
+    y_major = 1.3
+    bar_thickness = 0.2
+    y_gap = bar_thickness + 0.1
+    fontsize = 10
+    alpha = 0.5
+    hatch = '\\\\\\\\'
+    dagger = [r'}$', r'\dagger}$']
+
+    # set up figure
+    fig, ax = plt.subplots(figsize=(6, 3), layout='constrained')
+    ax.axis('off')
+    ax.set_xlim([-0.15, 5.85])
+    ax.set_ylim([0, 3])
+    ax.set_aspect('equal')
+    title = ['annihilation', 'creation']
+    ax.text(3, 2.94, 'Neutrino state ' + title[creation], ha='center', va='top', fontsize=fontsize + 2)
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    color_blue = colors[0]
+    color_red = colors[3]
+
+    # add left-handed Dirac spinors
+    ax.add_artist(Rectangle((x_left, y_dirac), (1 - h_supp_factor)*width, bar_thickness, \
+                            color=color_blue, alpha=alpha, label=r'$\nu^{\!' + dagger[int(creation)]))
+    ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_dirac), h_supp_factor*width, \
+                                 bar_thickness, color=color_red, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_left, y_dirac), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_left, y_dirac), (1 - h_supp_factor)*width, bar_thickness, color='k', fill=False))
+    ax.add_artist(Rectangle((x_left, y_dirac - y_gap), (1 - h_supp_factor)*width, bar_thickness, \
+                            color=color_red, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_dirac - y_gap), h_supp_factor*width, \
+                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch, \
+                                 label=r'$\nu^{\!' + dagger[not int(creation)]))
+    ax.add_artist(Rectangle((x_left, y_dirac - y_gap), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_left, y_dirac - y_gap), (1 - h_supp_factor)*width, bar_thickness, ec='k', fc='none'))
+
+    # add left-handed Majorana spinors
+    ax.add_artist(Rectangle((x_left, y_major), (1 - h_supp_factor)*width, bar_thickness, \
+                            color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_major), h_supp_factor*width, \
+                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_left, y_major), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_left, y_major), (1 - h_supp_factor)*width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_left, y_major - y_gap), (1 - h_supp_factor)*width, bar_thickness, \
+                            color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_major - y_gap), h_supp_factor*width, \
+                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_left, y_major - y_gap), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_left, y_major - y_gap), (1 - h_supp_factor)*width, bar_thickness, \
+                            ec='k', fc='none'))
+
+    # add v=0 Dirac spinors
+    ax.add_artist(Rectangle((x_mid, y_dirac), 0.5*width, bar_thickness, color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_dirac), 0.5*width, bar_thickness, color=color_red, \
+                                 alpha=alpha, hatch=hatch, label=r'$\overline{N}^{' + dagger[not int(creation)]))
+    ax.add_artist(Rectangle((x_mid, y_dirac), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_mid, y_dirac), 0.5*width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), 0.5*width, bar_thickness, color=color_red, \
+                            alpha=alpha, label=r'$\overline{N}^{' + dagger[int(creation)]))
+    ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_dirac - y_gap), 0.5*width, bar_thickness, \
+                                 color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), 0.5*width, bar_thickness, ec='k', fc='none'))
+
+    # add v=0 Majorana spinors
+    ax.add_artist(Rectangle((x_mid, y_major), 0.5*width, bar_thickness, color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_major), 0.5*width, bar_thickness, \
+                                 color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_mid, y_major), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_mid, y_major), 0.5*width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_mid, y_major - y_gap), 0.5*width, bar_thickness, \
+                            color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_major - y_gap), 0.5*width, bar_thickness, \
+                                 color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_mid, y_major - y_gap), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_mid, y_major - y_gap), 0.5*width, bar_thickness, ec='k', fc='none'))
+
+    # add right-handed Dirac spinors
+    ax.add_artist(Rectangle((x_right, y_dirac), h_supp_factor*width, bar_thickness, \
+                            color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_dirac), (1 - h_supp_factor)*width, \
+                                 bar_thickness, color=color_red, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_right, y_dirac), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_right, y_dirac), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_right, y_dirac - y_gap), h_supp_factor*width, bar_thickness, \
+                            color=color_red, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_dirac - y_gap), (1 - h_supp_factor)*width, 
+                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_right, y_dirac - y_gap), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_right, y_dirac - y_gap), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
+
+    # add right-handed Majorana spinors
+    ax.add_artist(Rectangle((x_right, y_major), h_supp_factor*width, bar_thickness, \
+                            color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_major), (1 - h_supp_factor)*width, 
+                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_right, y_major), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_right, y_major), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_right, y_major - y_gap), h_supp_factor*width, bar_thickness, \
+                            color=color_blue, alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_major - y_gap), (1 - h_supp_factor)*width, \
+                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+    ax.add_artist(Rectangle((x_right, y_major - y_gap), width, bar_thickness, ec='k', fc='none'))
+    ax.add_artist(Rectangle((x_right, y_major - y_gap), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
+
+    # add titles and labels
+    ax.text(x_left + width/2., (y_dirac + bar_thickness + y_major - y_gap)/2., 'Left-handed', \
+            ha='center', va='center', fontsize=fontsize)
+    ax.text(x_mid + width/2., (y_dirac + bar_thickness + y_major - y_gap)/2., r'$\leftarrow~helicity~\rightarrow$', \
+            ha='center', va='center', fontsize=fontsize)
+    ax.text(x_right + width/2., (y_dirac + bar_thickness + y_major - y_gap)/2., 'Right-handed', \
+            ha='center', va='center', fontsize=fontsize)
+    ax.text(x_left + width/2., y_dirac + 1.1*bar_thickness, r'$v\approx c$', \
+            ha='center', va='bottom', fontsize=fontsize)
+    ax.text(x_mid + width/2., y_dirac + 1.1*bar_thickness, r'$v\approx 0$', \
+            ha='center', va='bottom', fontsize=fontsize)
+    ax.text(x_right + width/2., y_dirac + 1.1*bar_thickness, r'$v\approx c$', \
+            ha='center', va='bottom', fontsize=fontsize)
+    ax.text(x_right + width + 0.3, y_dirac + bar_thickness/2., r'$\nu_e$', \
+            ha='right', va='center', fontsize=fontsize)
+    ax.text(x_right + width + 0.3, y_dirac - y_gap + bar_thickness/2., r'$\overline{\nu}_e$', \
+            ha='right', va='center', fontsize=fontsize)
+    ax.text(x_right + width + 0.3, y_major + bar_thickness/2., r'$\nu_e$', \
+            ha='right', va='center', fontsize=fontsize)
+    ax.text(x_right + width + 0.3, y_major - y_gap + bar_thickness/2., r'$\overline{\nu}_e$', \
+            ha='right', va='center', fontsize=fontsize)
+    ax.text(x_left - 0.3, y_dirac - (y_gap - bar_thickness)/2., 'Dirac', rotation=90, \
+            ha='left', va='center', fontsize=fontsize + 2)
+    ax.text(x_left - 0.3, y_major - (y_gap - bar_thickness)/2., 'Majorana', rotation=90, \
+            ha='left', va='center', fontsize=fontsize + 2)
+
+    # add legend
+    operation = [[r'$\nu_e$-induced IBD', r'$\overline{\nu}_e$-induced IBD'], \
+                 [r'$\epsilon/\beta^{\!+}$ decay', r'$\beta^{\!-}$ decay']]
+
+    current = [r'$J_-^\mu=e^{\!\dagger} \overline{\sigma}^{\,\mu} \nu$', \
+               r'$J_+^\mu=\nu^{\!\dagger} \overline{\sigma}^{\,\mu} e$']
+    ax.text(x_left + 1.1, y_major - y_gap - 0.3, operation[int(creation)][0], fontsize=fontsize)
+    ax.text(x_left + 2.4, y_major - y_gap - 0.3, operation[int(creation)][1], fontsize=fontsize)
+    ax.text(x_left - 0.2, y_major - y_gap - 0.6, 'Weak currents:', fontsize=fontsize)
+    ax.text(x_left + 1.1, y_major - y_gap - 0.6, current[int(creation)], fontsize=fontsize)
+    ax.text(x_left + 2.4, y_major - y_gap - 0.6, current[not int(creation)], fontsize=fontsize)
+    ax.text(x_left - 0.2, y_major - y_gap - 0.9, 'Field operators:', fontsize=fontsize)
+    legend = ax.legend(ncol=4, frameon=False, handlelength=3, handletextpad=0.5, columnspacing=3.3, loc='lower left', \
+                       bbox_to_anchor=(0.28, -0.03), fontsize=fontsize, handler_map={CompositePatch: HandlerCompositePatch()})
+    legend.set_rasterized(True)
+
+    # save the figure
+    if save_path:
+        fig.savefig(save_path, dpi=1200)
+
+def mass_mechanisms(save_path=None, serif=True):
+    """Make a diagram illustrating the main neutrino mass generation mechanisms.
+
+    :param save_path: path where the figure should be saved
+    :type save_path: str, optional
+    :param serif: use serif fonts in the diagram (default is True)
+    :type serif: bool
+    """
+
+    if serif:
+        rcparams = {'font.family': 'serif', 'mathtext.fontset': 'cm', 'font.serif': 'Times New Roman'}
+    else:
+        rcparams = None
+
+    with plt.rc_context(rcparams):
+
+        # size of the figure
+        x_scale = 6
+        y_scale = 4
+
+        # font sizes
+        textsize = 12
+        symbolsize = 14
+        masssize = 14
+
+        # set colors for each group of elements
+        colors = color_sequences['tab10']
+        scheme = [colors[2], colors[4], colors[3], colors[0], colors[5], colors[1]]
+        path1 = scheme[0]
+        path2 = scheme[1]
+        sm = scheme[2]
+        dirac = scheme[3]
+        left = scheme[4]
+        right = scheme[5]
+        alpha = 0.15
+
+        # arrow, line, hatch, and marker parameters
+        lw = 1.
+        ls = ':'
+        arrow_size = lw/10.
+        t1_params = {'color':path1, 'width':arrow_size, 'length':3*arrow_size}
+        t2_params = {'color':path2, 'width':arrow_size, 'length':3*arrow_size}
+        di_params = {'color':dirac, 'width':arrow_size, 'length':3*arrow_size}
+        hatch = '/' + '/'*int(18//x_scale)
+        ms = 8*lw
+
+        # padding as a fraction of the full width
+        x_pad = 0.02
+        y_pad = 0.02
+
+        # define the locations of vertices
+        x_v = 0.12
+        y_v = 0.72
+        x_N = 0.21
+        y_N = 0.22
+        x_M = 0.50
+        slope = (y_v - y_N)/(x_v - x_N)
+        inter = y_N -slope*x_N
+        y_D = 0.5
+        x_D = (y_D - y_N)/slope + x_N
+        l_h = 0.08
+        l_d = 0.13
+
+        # define the box sizes
+        w_bg = 0.06*x_scale
+        h_bg = 0.10*y_scale
+        w_SM = 0.08*x_scale
+        h_SM = 0.14*y_scale
+        px_D = (x_v - 0.08)*x_scale
+        py_D = (y_N - 0.06)*y_scale
+        w_D = 0.22*x_scale
+        h_D = 0.65*y_scale
+        w_t2 = 0.88*x_scale
+        h_t2 = 0.28*y_scale
+        py_t2 = 0.63*y_scale
+        w_t1 = 0.26*x_scale
+        h_t1 = 0.75*y_scale
+        h2_t1 = 0.25*h_t1
+        px_t1 = 0.02*x_scale
+        py_t1 = 0.10*y_scale
+
+        # create a new figure
+        fig, ax = plt.subplots(figsize=(x_scale, y_scale), layout='constrained')
+        diagram = feynman.Diagram(ax)
+
+        # define all the vertices
+        v1 = diagram.vertex(xy=(x_v*x_scale, y_v*y_scale), marker='')
+        v2 = diagram.vertex(xy=(x_D*x_scale, y_D*y_scale), marker='.', ms=0.5*ms, color=dirac)
+        v6 = diagram.vertex(xy=((1 - x_D)*x_scale, y_D*y_scale), marker='.', ms=0.5*ms, color=dirac)
+        v9 = diagram.vertex(xy=((x_D - l_h)*x_scale, y_D*y_scale), marker='x', ms=ms, color=dirac, mew=lw)
+        v10 = diagram.vertex(xy=((1 - x_D + l_h)*x_scale, y_D*y_scale), marker='x', ms=ms, color=dirac, mew=lw)
+        v3 = diagram.vertex(xy=(x_N*x_scale, y_N*y_scale), marker='')
+        v4 = diagram.vertex(xy=(x_M*x_scale, y_N*y_scale), marker='x', ms=ms, color=path1, mew=lw)
+        v5 = diagram.vertex(xy=((1 - x_N)*x_scale, y_N*y_scale), marker='')
+        v7 = diagram.vertex(xy=((1 - x_v)*x_scale, y_v*y_scale), marker='')
+        v8 = diagram.vertex(xy=(x_M*x_scale, y_v*y_scale), marker='.', ms=0.5*ms, color=path2, mew=lw)
+        v11 = diagram.vertex(xy=(x_M*x_scale, (y_v + l_d)*y_scale), marker='x', ms=ms, color=path2, mew=lw)
+
+        # add lines between vertices
+        l1 = diagram.line(v1, v2, lw=lw, color=dirac, arrow_param=di_params)
+        l2 = diagram.line(v3, v2, lw=lw, color=dirac, arrow_param=di_params)
+        l5 = diagram.line(v5, v6, lw=lw, color=dirac, arrow_param=di_params)
+        l6 = diagram.line(v7, v6, lw=lw, color=dirac, arrow_param=di_params)
+        l9 = diagram.line(v2, v9, lw=lw, ls='--', color=dirac, arrow=False)
+        l10 = diagram.line(v6, v10, lw=lw, ls='--', color=dirac, arrow=False)
+        l3 = diagram.line(v4, v3, lw=lw, color=path1, arrow_param=t1_params)
+        l4 = diagram.line(v4, v5, lw=lw, color=path1, arrow_param=t1_params)
+        l7 = diagram.line(v7, v8, lw=lw, color=path2, arrow_param=t2_params)
+        l8 = diagram.line(v1, v8, lw=lw, color=path2, arrow_param=t2_params)
+        l11 = diagram.line(v8, v11, lw=lw, ls='--', color=path2, arrow=False)
+
+        # background behind labels
+        bg1 = Rectangle((x_v*x_scale - w_bg/2., y_v*y_scale - h_bg/2.), w_bg, h_bg, fc='white', ec='none', zorder=99)
+        bg2 = Rectangle(((1 - x_v)*x_scale - w_bg/2., y_v*y_scale - h_bg/2.), w_bg, h_bg, fc='white', ec='none', zorder=99)
+        ax.add_patch(bg1)
+        ax.add_patch(bg2)
+
+        # box defining interactions in minimal SM
+        r1 = Rectangle((x_v*x_scale - w_SM/2., y_v*y_scale - h_SM/2.), w_SM, h_SM, fc='none', \
+                    ec=sm, lw=lw, ls=ls, zorder=999)
+        r2 = Rectangle(((1 - x_v)*x_scale - w_SM/2., y_v*y_scale - h_SM/2.), w_SM, h_SM, fc='none', \
+                    ec=sm, lw=lw, ls=ls, zorder=999)
+        ax.add_patch(r1)
+        ax.add_patch(r2)
+
+        # box defining interactions for pure Dirac neutrinos
+        r3 = Rectangle((px_D, py_D), w_D, h_D, ec=dirac, fc='none', lw=lw, ls=ls, zorder=999)
+        r4 = Rectangle((x_scale - px_D - w_D, py_D), w_D, h_D, ec=dirac, fc='none', lw=lw, ls=ls, zorder=999)
+        ax.add_patch(r3)
+        ax.add_patch(r4)
+
+        # regions defining chirality and particle/antiparticle state
+        r5 = Rectangle((-x_pad*x_scale, -y_pad*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                    ls='none', color=right, alpha=alpha, lw=lw, zorder=100)
+        r7 = Rectangle((-x_pad*x_scale, 0.50*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                    ls='none', color=left, alpha=alpha, lw=lw, zorder=100)
+        with plt.rc_context({'hatch.linewidth': lw}):
+            r6 = CompositePatch(Rectangle, (0.50*x_scale, -y_pad*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                                ls='none', color=left, hatch=hatch, alpha=alpha, lw=lw, zorder=100)
+            r8 = CompositePatch(Rectangle, (0.5*x_scale, 0.50*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                                ls='none', color=right, hatch=hatch, alpha=alpha, lw=lw, zorder=100)
+        ax.add_artist(r5)
+        ax.add_artist(r6)
+        ax.add_artist(r7)
+        ax.add_artist(r8)
+
+        # box defining interactions for Type-II seesaw mechanism
+        r9 = Rectangle(((x_scale - w_t2)/2., py_t2), w_t2, h_t2, ec=path2, fc='none', lw=lw, ls=ls, zorder=999)
+        ax.add_artist(r9)
+
+        # region defining interactions for Type-I seesaw mechanism
+        b1 = Line2D((px_t1, px_t1), (py_t1, py_t1 + h_t1), color=path1, lw=lw, \
+                    ls=ls, zorder=999)
+        b2 = Line2D((x_scale - px_t1, x_scale - px_t1), (py_t1, py_t1 + h_t1), \
+                    color=path1, lw=lw, ls=ls, zorder=999)
+        b3 = Line2D((px_t1, x_scale - px_t1), (py_t1, py_t1), color=path1, lw=lw, \
+                    ls=ls, zorder=999)
+        b4 = Line2D((px_t1, px_t1 + w_t1), (py_t1 + h_t1, py_t1 + h_t1), \
+                    color=path1, lw=lw, ls=ls, zorder=999)
+        b5 = Line2D((x_scale - px_t1 - w_t1, x_scale - px_t1), (py_t1 + h_t1, py_t1 + h_t1), \
+                    color=path1, lw=lw, ls=ls, zorder=999)
+        b6 = Line2D((px_t1 + w_t1, px_t1 + w_t1), (py_t1 + h_t1, py_t1 + h2_t1), \
+                    color=path1, lw=lw, ls=ls, zorder=999)
+        b7 = Line2D((x_scale - px_t1 - w_t1, x_scale - px_t1 - w_t1), (py_t1 + h_t1, py_t1 + h2_t1), \
+                    color=path1, lw=lw, ls=ls, zorder=999)
+        b8 = Line2D((px_t1 + w_t1, x_scale - px_t1 - w_t1), (py_t1 + h2_t1, py_t1 + h2_t1), \
+                    color=path1, lw=lw, ls=ls, zorder=999)
+        ax.add_line(b1)
+        ax.add_line(b2)
+        ax.add_line(b3)
+        ax.add_line(b4)
+        ax.add_line(b5)
+        ax.add_line(b6)
+        ax.add_line(b7)
+        ax.add_line(b8)
+
+        # labels for fermion lines
+        diagram.text(x_v*x_scale, y_v*y_scale, r'$\nu$', fontsize=symbolsize, zorder=999)
+        diagram.text((1 - x_v)*x_scale, y_v*y_scale, r'$\nu$', fontsize=symbolsize, zorder=999)
+        diagram.text(x_D*x_scale, y_N*y_scale, r'$\overline{N}$', fontsize=symbolsize, zorder=999)
+        diagram.text((1 - x_D)*x_scale, y_N*y_scale, r'$\overline{N}$', fontsize=symbolsize, zorder=999)
+        diagram.text((x_D - l_h + 0.02)*x_scale, (y_D - 0.07)*y_scale, r'$\left<\Phi\right>$', \
+                    color=dirac, fontsize=symbolsize, zorder=999)
+        diagram.text((1 - x_D + l_h - 0.02)*x_scale, (y_D - 0.07)*y_scale, r'$\left<\Phi\right>$', \
+                    color=dirac, fontsize=symbolsize, zorder=999)
+        diagram.text(0.45*x_scale, (y_v + l_d - 0.03)*y_scale, r'$\left<\Delta\right>$', \
+                    color=path2, fontsize=symbolsize, zorder=999)
+
+        # mass generation mechanism labels
+        diagram.text(0.5*x_scale, 0.55*y_scale, 'Minimal Standard Model', color=sm, fontsize=textsize, zorder=999)
+        diagram.text(0.5*x_scale, 0.45*y_scale, 'Pure Dirac', fontsize=textsize, color=dirac, zorder=999)
+        diagram.text(0.5*x_scale, 0.95*y_scale, 'Type-II seesaw', color=path2, fontsize=textsize, zorder=999)
+        diagram.text(0.5*x_scale, 0.35*y_scale, 'Type-I seesaw', color=path1, fontsize=textsize, zorder=999)
+
+        # chirality labels
+        diagram.text(0.13*x_scale, 0.95*y_scale, 'Left-handed', fontsize=textsize, color=left, zorder=999)
+        diagram.text(0.87*x_scale, 0.95*y_scale, 'Right-handed', fontsize=textsize, color=right, zorder=999)
+        diagram.text(0.11*x_scale, 0.04*y_scale, '$L=+1$', fontsize=textsize, color='k', zorder=999)
+        diagram.text(0.89*x_scale, 0.04*y_scale, '$L=-1$', fontsize=textsize, color='k', zorder=999)
+        diagram.text(0.50*x_scale, 0.04*y_scale, r'$Time$  $\longrightarrow$', fontsize=textsize, zorder=999, math_fontfamily='cm')
+
+        # labels for mass insertions
+        diagram.text((x_D + 0.04)*x_scale, y_D*y_scale, r'$y_\nu$', fontsize=masssize, color=dirac, zorder=999)
+        diagram.text((1 - x_D - 0.04)*x_scale, y_D*y_scale, r'$y_\nu$', fontsize=masssize, color=dirac, zorder=999)
+        diagram.text(0.50*x_scale, 0.15*y_scale, r'$m_\mathrm{M}$', fontsize=masssize, color=path1, zorder=999)
+        diagram.text(0.50*x_scale, 0.67*y_scale, r'$y_\mathrm{L}$', fontsize=masssize, color=path2, zorder=999)
+
+        # plot everything and set the axes
+        diagram.plot()
+        ax.set_axis_off()
+        ax.set_xlim([-x_pad*x_scale, x_scale*(1 + x_pad)])
+        ax.set_ylim([-y_pad*y_scale, y_scale*(1 + y_pad)])
+        ax.set_aspect('equal')
+
+        if save_path:
+            fig.savefig(save_path, pad_inches=-0.1)
+

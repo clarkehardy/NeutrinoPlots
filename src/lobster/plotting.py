@@ -3,7 +3,7 @@ from matplotlib.colors import LogNorm,LinearSegmentedColormap
 from matplotlib import rcParams
 import numpy as np
 from scipy.stats import gaussian_kde
-from utils.util_funcs import *
+from nuplots.utils import *
 from lobster.prob_funcs import *
 from lobster.contours import *
 

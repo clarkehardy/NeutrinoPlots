@@ -1,6 +1,6 @@
 import numpy as np
 from tqdm import tqdm
-from utils.util_funcs import *
+from nuplots.utils import *
 
 
 def get_3sigma_range(m_lightest, params, inverted=False, nsamples=1e4, sum=False):
