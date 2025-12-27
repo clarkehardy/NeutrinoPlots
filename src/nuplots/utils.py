@@ -145,6 +145,41 @@ def get_pmns_matrix(params):
     return PMNS
 
 
+def get_mass_ranges(params):
+    # Constants from experiment
+    delta_m21_sq = params['delta_m2_21'][0] # eV^2
+    delta_m31_sq_NH = -params['delta_m2_23'][0] # eV^2 for NH
+    delta_m32_sq_IH = params['delta_m2_23'][0] # eV^2 for IH
+    sum_mass_limit = 0.12 # from Planck [eq. (1) in arXiv:1912.08208]
+
+    m_lightest = np.concatenate(([0], np.linspace(1e-4, 0.1, 1000)))
+    all_masses = []
+
+    for m1 in m_lightest:
+        # m1_, m2_, m3_ = get_masses_NH(m1)
+        m2 = m2_no(m1, delta_m21_sq)
+        m3 = m3_no(m1, delta_m21_sq, -delta_m31_sq_NH)
+        if m1 + m2 + m3 <= sum_mass_limit:
+            all_masses.append((m1, m2, m3))
+
+    for m3 in m_lightest:
+        # result = get_masses_IH(m3)
+        m1 = m1_io(m3, -delta_m32_sq_IH, delta_m21_sq)
+        m2 = m2_io(m3, -delta_m32_sq_IH)
+        # if result:
+        if not (np.isnan(m1) or np.isnan(m2)):
+            # m1_, m2_, m3_ = result
+            if m1 + m2 + m3 <= sum_mass_limit:
+                all_masses.append((m1, m2, m3))
+
+    arr = np.array(all_masses)
+    mins = np.min(arr, axis=0)
+    maxs = np.max(arr, axis=0)
+
+    return mins, maxs
+
+
+
 def create_text_figure(text, save_path=None, fontsize=24, color='k', facecolor='none', \
                        padding=0.25, dpi=None):
     """Creates a figure with the given text in matplotlib. Used to make

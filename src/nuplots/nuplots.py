@@ -3,14 +3,63 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from matplotlib import color_sequences
+from matplotlib.colors import to_hex
 import feynman
-from nuplots.load_data import load_params
-from nuplots.utils import CompositePatch, HandlerCompositePatch, get_pmns_matrix
+from nuplots.utils import CompositePatch, HandlerCompositePatch, get_mass_ranges, get_pmns_matrix
 
-def oscillation():
-    pass
+def oscillation(params, save_path=None):
+    """Make a plot showing the oscillation probability as a function of L/E.
+
+    :param params: dictionary of neutrino oscillation parameters
+    :type params: dict
+    :param save_path: path where the figure should be saved, defaults to None
+    :type save_path: str, optional
+    """
+    colors = color_sequences['tab10']
+    nu_colors = [colors[3], colors[8], colors[0]]
+
+    delta_m21_sq = params['delta_m2_21'][0] # eV^2
+    delta_m31_sq_NH = -params['delta_m2_23'][0] # eV^2 for NH
+
+    U = get_pmns_matrix(params)
+    L_by_E = np.logspace(2, np.log10(6e4), 1000)
+
+    def flavor_fractions(L_by_E):
+        dm = np.array([0, delta_m21_sq, delta_m31_sq_NH])
+        psi_mass = np.zeros((3, len(L_by_E)), dtype=np.complex128)
+        for i in range(3):
+            phase = np.exp(-1j * dm[i] * 1.267 * L_by_E)
+            psi_mass[i] = U[0, i] * phase
+
+        psi_flavor = U @ psi_mass
+        probs = np.abs(psi_flavor)**2
+        return probs
+
+    fractions = flavor_fractions(L_by_E)
+    labels = [r'$\nu_e$', r'$\nu_\mu$', r'$\nu_\tau$']
+
+    fig, ax = plt.subplots(figsize=(6, 3), layout='constrained')
+    ax.stackplot(L_by_E, fractions, labels=labels, colors=nu_colors, alpha=0.8)
+
+    ax.set_xscale('log')
+    ax.set_xlim(L_by_E[0], L_by_E[-1])
+    ax.set_ylim(0, 1)
+    ax.set_xlabel('$L/E$ [km/GeV]')
+    ax.set_ylabel('Flavor fraction')
+    ax.legend(loc='lower left')
+
+    if save_path:
+        fig.savefig(save_path)
 
 def mass_ordering(params, save_path=None):
+    """Make a plot showing the ordering of the neutrino masses under both
+    ordering scenarios.
+
+    :param params: dictionary of neutrino oscillation parameters
+    :type params: dict
+    :param save_path: path where the figure should be saved, defaults to None
+    :type save_path: str, optional
+    """
     colors = color_sequences['tab10']
     nu_colors = [colors[3], colors[8], colors[0]]
 
@@ -60,8 +109,72 @@ def mass_ordering(params, save_path=None):
     if save_path:
         fig.savefig(save_path)
 
-def mass_scale():
-    pass
+def mass_scale(fermion_masses, params, save_path=None):
+    """Make a plot showing the absolute scale of neutrino masses compared to
+    all other fermions.
+
+    :param fermion_masses: dictionary of fermion masses
+    :type fermion_masses: dict
+    :param params: dictionary of neutrino oscillation parameters
+    :type params: dict
+    :param save_path: path where the figure should be saved, defaults to None
+    :type save_path: str, optional
+    """
+    all_colors = [to_hex(c) for c in color_sequences['tab10']]
+    nu_colors = [all_colors[3], all_colors[8], all_colors[0]]
+
+    other_colors = []
+    for c in all_colors:
+        if c not in nu_colors:
+            other_colors.append(c)
+
+    fermion_colors = np.array(['#######' for i in range(10)])
+    fermion_colors[np.array((2, 5, 8))] = np.array(nu_colors)
+    j = 0
+    for i in range(len(fermion_colors)):
+        if fermion_colors[i] == '#######':
+            fermion_colors[i] = other_colors[j]
+            j += 1
+    fermion_colors[-1], fermion_colors[-3] = fermion_colors[-3], fermion_colors[-1]
+
+    gen_1 = ['up', 'down', 'electron']
+    gen_2 = ['charm', 'strange', 'muon']
+    gen_3 = ['top', 'bottom', 'tau']
+
+    fig, ax = plt.subplots(figsize=(6, 3), layout='constrained')
+    ax.set_prop_cycle(color=fermion_colors)
+    ax.set_yticks(np.arange(1, 4))
+    ax.set_ylabel('Generation')
+    ax.set_xlabel('Mass [eV]')
+    ax.set_ylim([0.5, 3.5])
+    ax.set_xlim([1e-6, 1e12])
+    markers = ['^', 'v', 's']
+    labels = np.array([['u', 'd', 'e', r'$\nu_1$'], \
+                    ['c', 's', r'$\mu$', r'$\nu_2$'], \
+                    ['t', 'b', r'$\tau$', r'$\nu_3$']])
+    adjustments = np.zeros(labels.shape)
+    adjustments[0, 1] = 1.
+    adjustments[1, 1] = -1.
+    adjustments[1, 2] = 1.
+    adjustments[2, 1] = 0.5
+    adjustments[2, 2] = -0.5
+
+    mins, maxs = get_mass_ranges(params)
+
+    for i, (mi_min, mi_max) in enumerate(zip(mins, maxs), start=1):
+        fermion_masses['nu_' + str(i)] = (mi_min, mi_max)
+
+    for i, gen in enumerate([gen_1, gen_2, gen_3], start=1):
+        for j, key in enumerate(gen):
+            c, = ax.semilogx(fermion_masses[key], i, marker=markers[j], ls='none', fillstyle='none')
+            ax.text(fermion_masses[key]*2.**adjustments[i-1, j], i + 0.15, labels[i-1, j], va='center', color=c.get_color(), style='italic')
+        ax.semilogx(fermion_masses['nu_' + str(i)], (i, i), marker='|', ls='-', mew=2, color=c.get_color())
+        ax.text(fermion_masses['nu_' + str(i)][-1]*0.2, i + 0.15, labels[i-1, -1], va='center', color=c.get_color(), style='italic')
+
+    ax.fill_betweenx([0, 4], fermion_masses['electron'], fermion_masses['nu_3'][1], color=fermion_colors[-1], hatch='\\\\', alpha=0.15, rasterized=True)
+
+    if save_path:
+        fig.savefig(save_path)
 
 def spinors(creation=False, save_path=None):
     """Make a plot showing the chiral composition of neutrino helicity states.
