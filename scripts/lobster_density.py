@@ -7,7 +7,7 @@ try:
 except:
     pass
 from lobster.plotting import *
-from utils.load_data import *
+from nuplots.load_data import *
 
 
 if __name__=='__main__':

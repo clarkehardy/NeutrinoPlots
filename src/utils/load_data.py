@@ -5,11 +5,19 @@ import csv
 import yaml
 
 
-def load_osc_data(inverted=False,data_dir='../data',plot=False):
-    '''
-    Load the one-dimensional projections of the three-neutrino oscillation parameter fit from a global analysis of
+def load_osc_data(inverted=False, data_dir='../data', plot=False):
+    """Load the one-dimensional projections of the three-neutrino oscillation parameter fit from a global analysis of
     solar, atmospheric, accelerator, and reactor data provided by nu-fit.org.
-    '''
+
+    :param inverted: whether to use inverted neutrino mass ordering
+    :type inverted: bool
+    :param data_dir: directory in which the oscillation parameters are stored
+    :type data_dir: str
+    :param plot: whether to plot the oscillation parameter fits
+    :type plot: bool
+    :return: interpolating functions for chi^2 values. If plot is True, also returns figure and axes objects.
+    :rtype: tuple
+    """
 
     # get the correct file for normal or inverted ordering
     if inverted:
@@ -90,10 +98,16 @@ def load_osc_data(inverted=False,data_dir='../data',plot=False):
     return chi2_sin2_theta12_func,chi2_sin2_theta13_func,chi2_delta_m2_21_func,chi2_delta_m2_23_func
 
 
-def load_endpoint_data(data_dir='../data',plot=False):
-    '''
-    Load data from beta spectrum endpoint measurements for the effective electron neutrino mass.
-    '''
+def load_endpoint_data(data_dir='../data', plot=False):
+    """Load data from beta spectrum endpoint measurements for the effective electron neutrino mass.
+
+    :param data_dir: directory in which the oscillation parameters are stored
+    :type data_dir: str
+    :param plot: whether to plot the endpoint measurement fit
+    :type plot: bool
+    :return: interpolating function for chi^2 values. If plot is True, also returns figure and axes objects.
+    :rtype: scipy.interpolate.interp1d or tuple
+    """
 
     # path to the supplementary data provided by KATRIN
     path = data_dir + '/41567_2021_1463_MOESM5_ESM.txt'
@@ -130,10 +144,16 @@ def load_endpoint_data(data_dir='../data',plot=False):
     return chi2_m2_beta_func
 
 
-def load_0vbb_data(data_dir='../data',plot=False):
-    '''
-    Load data from neutrinoless double beta decay searches which place limits on the effective Majorana mass.
-    '''
+def load_0vbb_data(data_dir='../data', plot=False):
+    """Load data from neutrinoless double beta decay searches which place limits on the effective Majorana mass.
+
+    :param data_dir: directory in which the oscillation parameters are stored
+    :type data_dir: str
+    :param plot: whether to plot the 0vbb limit fit
+    :type plot: bool
+    :return: interpolating function for chi^2 values. If plot is True, also returns figure and axes objects.
+    :rtype: scipy.interpolate.interp1d or tuple
+    """
 
     # path to the supplementary data provided by KamLAND-Zen
     path = data_dir + '/SupplementaryData_KamLANDZen_20220304.txt'
@@ -170,11 +190,15 @@ def load_0vbb_data(data_dir='../data',plot=False):
 
 
 def load_params(data_dir='../data'):
-    '''
-    Load parameters used to calculate the effective Majorana mass from the 0vbb
+    """Load parameters used to calculate the effective Majorana mass from the 0vbb
     half life, including the phase space factor, matrix element, and axial-vector
     coupling constant.
-    '''
+
+    :param data_dir: directory in which the oscillation parameters are stored
+    :type data_dir: str
+    :return: dictionary containing the parameters
+    :rtype: dict
+    """
 
     path = data_dir + '/params.yaml'
 

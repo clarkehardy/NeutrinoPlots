@@ -1,5 +1,5 @@
-from utils.load_data import *
-from utils.util_funcs import *
+from nuplots.load_data import *
+from nuplots.utils import *
 
 
 def lnlike(theta,chi2_funcs,params,ln_prior):
