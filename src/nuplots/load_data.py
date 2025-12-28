@@ -21,9 +21,9 @@ def load_osc_data(inverted=False, data_dir='../data', plot=False):
 
     # get the correct file for normal or inverted ordering
     if inverted:
-        path = data_dir + '/v52.release-SKyes-IO.txt'
+        path = data_dir + '/v60.release-TByes-IO.txt'
     else:
-        path = data_dir + '/v52.release-SKyes-NO.txt'
+        path = data_dir + '/v60.release-TByes-NO.txt'
 
     # prefixes to identify the correct sections of the file
     prefixes = ['T13','T12','T23','DCP','DMS','DMA']

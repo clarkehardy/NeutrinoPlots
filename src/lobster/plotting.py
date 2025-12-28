@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm,LinearSegmentedColormap
+from matplotlib.colors import LogNorm, LinearSegmentedColormap
 from matplotlib import rcParams
 import numpy as np
 from scipy.stats import gaussian_kde
 from nuplots.utils import *
 from lobster.prob_funcs import *
-from lobster.contours import *
+# from lobster.contours import *
 
 
 def density(samples_no=None, samples_io=None, npoints=100_000, nbins=200, params=None,\

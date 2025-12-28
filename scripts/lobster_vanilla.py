@@ -6,7 +6,7 @@ try:
     plt.style.use('clarke-default')
 except:
     pass
-from lobster.plotting import *
+from nuplots.nuplots import *
 from nuplots.load_data import *
 
 

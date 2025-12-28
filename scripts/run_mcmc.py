@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool,cpu_count
 from nuplots.load_data import *
 from nuplots.utils import *
-from lobster.prob_funcs import *
-from lobster.plotting import *
+from nuplots.lobster import *
+from nuplots.nuplots import *
 
 
 if __name__=='__main__':
