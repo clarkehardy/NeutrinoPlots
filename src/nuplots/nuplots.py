@@ -238,7 +238,7 @@ def oscillation(params, save_path=None, colors=None, font=None):
     """
     if colors is None:
         colors = color_sequences['tab10']
-    nu_colors = [colors[3], colors[8], colors[0]]
+        colors = [colors[3], colors[8], colors[0]]
 
     delta_m21_sq = params['delta_m2_21'][0]
     delta_m31_sq_NH = -params['delta_m2_23'][0]
@@ -261,7 +261,7 @@ def oscillation(params, save_path=None, colors=None, font=None):
     labels = [r'$\nu_e$', r'$\nu_\mu$', r'$\nu_\tau$']
 
     fig, ax = plt.subplots(figsize=(6, 3), layout='constrained')
-    ax.stackplot(L_by_E, fractions, labels=labels, colors=nu_colors, alpha=0.8)
+    ax.stackplot(L_by_E, fractions, labels=labels, colors=colors, alpha=0.8)
 
     ax.set_xscale('log')
     ax.set_xlim(L_by_E[0], L_by_E[-1])
@@ -287,7 +287,7 @@ def mass_ordering(params, save_path=None, colors=None, font=None, serif=False):
     """
     if colors is None:
         colors = color_sequences['tab10']
-    nu_colors = [colors[3], colors[8], colors[0]]
+        colors = [colors[3], colors[8], colors[0]]
 
     # mass-squared differences are not plotted to scale
     dm2_sol = 1
@@ -311,9 +311,10 @@ def mass_ordering(params, save_path=None, colors=None, font=None, serif=False):
 
     fig, ax = plt.subplots(1, 2, figsize=(4, 4), layout='constrained')
     for i in range(2):
-        ax[i].barh(states[i], m2_1[indices[i]], height=height, color=nu_colors[0], label=r'$\nu_e$')
-        ax[i].barh(states[i], m2_2[indices[i]], left=m2_1[indices[i]], height=height, color=nu_colors[1], label=r'$\nu_\mu$')
-        ax[i].barh(states[i], m2_3[indices[i]], left=m2_1[indices[i]] + m2_2[indices[i]], height=height, color=nu_colors[2], label=r'$\nu_\tau$')
+        ax[i].barh(states[i], m2_1[indices[i]], height=height, color=colors[0], label=r'$\nu_e$')
+        ax[i].barh(states[i], m2_2[indices[i]], left=m2_1[indices[i]], height=height, color=colors[1], label=r'$\nu_\mu$')
+        ax[i].barh(states[i], m2_3[indices[i]], left=m2_1[indices[i]] + m2_2[indices[i]], height=height, \
+                   color=colors[2], label=r'$\nu_\tau$')
         ax[i].set_yticks(states[i])
         ax[i].set_yticklabels(mass_labels[indices[i]], fontsize=fontsize)
         for j in range(2):
@@ -351,30 +352,32 @@ def mass_scale(fermion_masses, params, save_path=None, colors=None, font=None, s
     """
     if colors is None:
         all_colors = [to_hex(c) for c in color_sequences['tab10']]
+    
+        nu_colors = [all_colors[3], all_colors[8], all_colors[0]]
+
+        other_colors = []
+        for c in all_colors:
+            if c not in nu_colors:
+                other_colors.append(c)
+
+        colors = np.array(['#######' for i in range(10)])
+        colors[np.array((2, 5, 8))] = np.array(nu_colors)
+        j = 0
+        for i in range(len(colors)):
+            if colors[i] == '#######':
+                colors[i] = other_colors[j]
+                j += 1
+        colors[-1], colors[-3] = colors[-3], colors[-1]
+
     else:
         all_colors = [to_hex(c) for c in colors]
-    nu_colors = [all_colors[3], all_colors[8], all_colors[0]]
-
-    other_colors = []
-    for c in all_colors:
-        if c not in nu_colors:
-            other_colors.append(c)
-
-    fermion_colors = np.array(['#######' for i in range(10)])
-    fermion_colors[np.array((2, 5, 8))] = np.array(nu_colors)
-    j = 0
-    for i in range(len(fermion_colors)):
-        if fermion_colors[i] == '#######':
-            fermion_colors[i] = other_colors[j]
-            j += 1
-    fermion_colors[-1], fermion_colors[-3] = fermion_colors[-3], fermion_colors[-1]
 
     gen_1 = ['up', 'down', 'electron']
     gen_2 = ['charm', 'strange', 'muon']
     gen_3 = ['top', 'bottom', 'tau']
 
     fig, ax = plt.subplots(figsize=(6, 3), layout='constrained')
-    ax.set_prop_cycle(color=fermion_colors)
+    ax.set_prop_cycle(color=colors)
     ax.set_yticks(np.arange(1, 4))
     ax.set_ylabel('Generation')
     ax.set_xlabel('Mass [eV]')
@@ -382,8 +385,8 @@ def mass_scale(fermion_masses, params, save_path=None, colors=None, font=None, s
     ax.set_xlim([1e-6, 1e12])
     markers = ['^', 'v', 's']
     labels = np.array([['u', 'd', 'e', r'$\nu_1$'], \
-                    ['c', 's', r'$\mu$', r'$\nu_2$'], \
-                    ['t', 'b', r'$\tau$', r'$\nu_3$']])
+                       ['c', 's', r'$\mu$', r'$\nu_2$'], \
+                       ['t', 'b', r'$\tau$', r'$\nu_3$']])
     adjustments = np.zeros(labels.shape)
     adjustments[0, 1] = 1.
     adjustments[1, 1] = -1.
@@ -403,7 +406,8 @@ def mass_scale(fermion_masses, params, save_path=None, colors=None, font=None, s
         ax.semilogx(fermion_masses['nu_' + str(i)], (i, i), marker='|', ls='-', mew=2, color=c.get_color())
         ax.text(fermion_masses['nu_' + str(i)][-1]*0.2, i + 0.15, labels[i-1, -1], va='center', color=c.get_color(), style='italic')
 
-    ax.fill_betweenx([0, 4], fermion_masses['electron'], fermion_masses['nu_3'][1], color=fermion_colors[-1], hatch='\\\\', alpha=0.15, rasterized=True)
+    ax.fill_betweenx([0, 4], fermion_masses['electron'], fermion_masses['nu_3'][1], color=colors[-1], \
+                     hatch='\\\\', alpha=0.15, rasterized=True)
 
     if save_path:
         fig.savefig(save_path)
@@ -422,6 +426,7 @@ def spinors(creation=False, save_path=None, colors=None, font=None, serif=False)
 
     if colors is None:
         colors = color_sequences['tab10']
+        colors = [colors[3], colors[0]]
 
     # define position and size parameters
     h_supp_factor = 0.1
@@ -446,90 +451,88 @@ def spinors(creation=False, save_path=None, colors=None, font=None, serif=False)
     ax.set_aspect('equal')
     title = ['annihilation', 'creation']
     ax.text(3, 2.94, 'Neutrino state ' + title[creation], ha='center', va='top', fontsize=fontsize + 2)
-    color_blue = colors[0]
-    color_red = colors[3]
 
     # add left-handed Dirac spinors
     ax.add_artist(Rectangle((x_left, y_dirac), (1 - h_supp_factor)*width, bar_thickness, \
-                            color=color_blue, alpha=alpha, label=r'$\nu^{\!' + dagger[int(creation)]))
+                            color=colors[0], alpha=alpha, label=r'$\nu^{\!' + dagger[int(creation)]))
     ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_dirac), h_supp_factor*width, \
-                                 bar_thickness, color=color_red, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[1], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_left, y_dirac), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_left, y_dirac), (1 - h_supp_factor)*width, bar_thickness, color='k', fill=False))
     ax.add_artist(Rectangle((x_left, y_dirac - y_gap), (1 - h_supp_factor)*width, bar_thickness, \
-                            color=color_red, alpha=alpha))
+                            color=colors[1], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_dirac - y_gap), h_supp_factor*width, \
-                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch, \
+                                 bar_thickness, color=colors[0], alpha=alpha, hatch=hatch, \
                                  label=r'$\nu^{\!' + dagger[not int(creation)]))
     ax.add_artist(Rectangle((x_left, y_dirac - y_gap), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_left, y_dirac - y_gap), (1 - h_supp_factor)*width, bar_thickness, ec='k', fc='none'))
 
     # add left-handed Majorana spinors
     ax.add_artist(Rectangle((x_left, y_major), (1 - h_supp_factor)*width, bar_thickness, \
-                            color=color_blue, alpha=alpha))
+                            color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_major), h_supp_factor*width, \
-                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_left, y_major), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_left, y_major), (1 - h_supp_factor)*width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_left, y_major - y_gap), (1 - h_supp_factor)*width, bar_thickness, \
-                            color=color_blue, alpha=alpha))
+                            color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_left + width - h_supp_factor*width, y_major - y_gap), h_supp_factor*width, \
-                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_left, y_major - y_gap), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_left, y_major - y_gap), (1 - h_supp_factor)*width, bar_thickness, \
                             ec='k', fc='none'))
 
     # add v=0 Dirac spinors
-    ax.add_artist(Rectangle((x_mid, y_dirac), 0.5*width, bar_thickness, color=color_blue, alpha=alpha))
-    ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_dirac), 0.5*width, bar_thickness, color=color_red, \
+    ax.add_artist(Rectangle((x_mid, y_dirac), 0.5*width, bar_thickness, color=colors[0], alpha=alpha))
+    ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_dirac), 0.5*width, bar_thickness, color=colors[1], \
                                  alpha=alpha, hatch=hatch, label=r'$\overline{N}^{' + dagger[not int(creation)]))
     ax.add_artist(Rectangle((x_mid, y_dirac), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_mid, y_dirac), 0.5*width, bar_thickness, ec='k', fc='none'))
-    ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), 0.5*width, bar_thickness, color=color_red, \
+    ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), 0.5*width, bar_thickness, color=colors[1], \
                             alpha=alpha, label=r'$\overline{N}^{' + dagger[int(creation)]))
     ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_dirac - y_gap), 0.5*width, bar_thickness, \
-                                 color=color_blue, alpha=alpha, hatch=hatch))
+                                 color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_mid, y_dirac - y_gap), 0.5*width, bar_thickness, ec='k', fc='none'))
 
     # add v=0 Majorana spinors
-    ax.add_artist(Rectangle((x_mid, y_major), 0.5*width, bar_thickness, color=color_blue, alpha=alpha))
+    ax.add_artist(Rectangle((x_mid, y_major), 0.5*width, bar_thickness, color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_major), 0.5*width, bar_thickness, \
-                                 color=color_blue, alpha=alpha, hatch=hatch))
+                                 color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_mid, y_major), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_mid, y_major), 0.5*width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_mid, y_major - y_gap), 0.5*width, bar_thickness, \
-                            color=color_blue, alpha=alpha))
+                            color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_mid + 0.5*width, y_major - y_gap), 0.5*width, bar_thickness, \
-                                 color=color_blue, alpha=alpha, hatch=hatch))
+                                 color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_mid, y_major - y_gap), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_mid, y_major - y_gap), 0.5*width, bar_thickness, ec='k', fc='none'))
 
     # add right-handed Dirac spinors
     ax.add_artist(Rectangle((x_right, y_dirac), h_supp_factor*width, bar_thickness, \
-                            color=color_blue, alpha=alpha))
+                            color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_dirac), (1 - h_supp_factor)*width, \
-                                 bar_thickness, color=color_red, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[1], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_right, y_dirac), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_right, y_dirac), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_right, y_dirac - y_gap), h_supp_factor*width, bar_thickness, \
-                            color=color_red, alpha=alpha))
+                            color=colors[1], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_dirac - y_gap), (1 - h_supp_factor)*width, 
-                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_right, y_dirac - y_gap), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_right, y_dirac - y_gap), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
 
     # add right-handed Majorana spinors
     ax.add_artist(Rectangle((x_right, y_major), h_supp_factor*width, bar_thickness, \
-                            color=color_blue, alpha=alpha))
+                            color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_major), (1 - h_supp_factor)*width, 
-                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_right, y_major), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_right, y_major), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_right, y_major - y_gap), h_supp_factor*width, bar_thickness, \
-                            color=color_blue, alpha=alpha))
+                            color=colors[0], alpha=alpha))
     ax.add_artist(CompositePatch(Rectangle, (x_right + h_supp_factor*width, y_major - y_gap), (1 - h_supp_factor)*width, \
-                                 bar_thickness, color=color_blue, alpha=alpha, hatch=hatch))
+                                 bar_thickness, color=colors[0], alpha=alpha, hatch=hatch))
     ax.add_artist(Rectangle((x_right, y_major - y_gap), width, bar_thickness, ec='k', fc='none'))
     ax.add_artist(Rectangle((x_right, y_major - y_gap), h_supp_factor*width, bar_thickness, ec='k', fc='none'))
 

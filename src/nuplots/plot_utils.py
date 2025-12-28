@@ -11,18 +11,18 @@ def create_text_figure(text, save_path=None, fontsize=24, color='k', facecolor='
     """Creates a figure with the given text in matplotlib. Used to make
     equations in latex for slides.
 
-    :param text: 
-    :type text: _type_
-    :param save_path: _description_, defaults to None
-    :type save_path: _type_, optional
-    :param fontsize: _description_, defaults to 24
+    :param text: text to plot
+    :type text: str
+    :param save_path: path where the figure should be saved, defaults to None
+    :type save_path: str, optional
+    :param fontsize: font size, defaults to 24
     :type fontsize: int, optional
-    :param color: _description_, defaults to 'k'
+    :param color: text color, defaults to 'k'
     :type color: str, optional
-    :param facecolor: _description_, defaults to 'none'
+    :param facecolor: text facecolor, defaults to 'none'
     :type facecolor: str, optional
-    :param dpi: _description_, defaults to None
-    :type dpi: _type_, optional
+    :param dpi: figure dpi, defaults to None
+    :type dpi: int, optional
     """
     fig, ax = plt.subplots(facecolor=facecolor)
     ax.set_xticks([])
