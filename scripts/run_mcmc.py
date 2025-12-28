@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool,cpu_count
 from nuplots.load_data import *
-from nuplots.utils import *
 from nuplots.lobster import *
 from nuplots.nuplots import *
 

@@ -8,7 +8,7 @@ from matplotlib.lines import Line2D
 from matplotlib import color_sequences
 from scipy.stats import gaussian_kde
 import feynman
-from nuplots.utils import CompositePatch, HandlerCompositePatch, set_fonts
+from nuplots.plot_utils import CompositePatch, HandlerCompositePatch, set_fonts
 from nuplots.mass_funcs import get_mass_ranges, get_pmns_matrix
 from nuplots.lobster import get_contours, model, basis_change
 
