@@ -1,0 +1,96 @@
+- symbol: Th
+  A: 232
+  Z: 90
+  halflife: '14.0 Gy'
+  alpha: true
+  beta: false
+  family: act
+  br: null
+- symbol: Ra
+  A: 228
+  Z: 88
+  halflife: '5.75 y'
+  alpha: false
+  beta: true
+  family: alk-e
+  br: null
+- symbol: Ac
+  A: 228
+  Z: 89
+  halflife: '6.15 h'
+  alpha: false
+  beta: true
+  family: act
+  br: null
+- symbol: Th
+  A: 228
+  Z: 90
+  halflife: '1.91 y'
+  alpha: true
+  beta: false
+  family: act
+  br: null
+- symbol: Ra
+  A: 224
+  Z: 88
+  halflife: '3.66 d'
+  alpha: true
+  beta: false
+  family: alk-e
+  br: null
+- symbol: Rn
+  A: 220
+  Z: 86
+  halflife: '55.6 s'
+  alpha: true
+  beta: false
+  family: nob
+  br: null
+- symbol: Po
+  A: 216
+  Z: 84
+  halflife: '0.145 s'
+  alpha: true
+  beta: false
+  family: chalc
+  br: null
+- symbol: Pb
+  A: 212
+  Z: 82
+  halflife: '10.6 h'
+  alpha: false
+  beta: true
+  family: post
+  br: null
+- symbol: Bi
+  A: 212
+  Z: 83
+  halflife: '60.6 min'
+  alpha: true
+  beta: true
+  family: post
+  br: 0.359
+- symbol: Tl
+  A: 208
+  Z: 81
+  halflife: '3.05 min'
+  alpha: false
+  beta: true
+  family: post
+  br: null
+- symbol: Po
+  A: 212
+  Z: 84
+  halflife: '299 ns'
+  alpha: true
+  beta: false
+  family: chalc
+  br: null
+- symbol: Pb
+  A: 208
+  Z: 82
+  halflife: stable
+  alpha: false
+  beta: false
+  family: post
+  br: null

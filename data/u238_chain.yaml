@@ -1,0 +1,152 @@
+- symbol: U
+  A: 238
+  Z: 92
+  halflife: '4.47 Gy'
+  alpha: true
+  beta: false
+  family: act
+  br: null
+- symbol: Th
+  A: 234
+  Z: 90
+  halflife: '24.1 d'
+  alpha: false
+  beta: true
+  family: act
+  br: null
+- symbol: Pa
+  A: 234
+  Z: 91
+  halflife: '6.70 h'
+  alpha: false
+  beta: true
+  family: act
+  br: null
+- symbol: U
+  A: 234
+  Z: 92
+  halflife: '246 ky'
+  alpha: true
+  beta: false
+  family: act
+  br: null
+- symbol: Th
+  A: 230
+  Z: 90
+  halflife: '75.4 ky'
+  alpha: true
+  beta: false
+  family: act
+  br: null
+- symbol: Ra
+  A: 226
+  Z: 88
+  halflife: '1.60 ky'
+  alpha: true
+  beta: false
+  family: alk-e
+  br: null
+- symbol: Rn
+  A: 222
+  Z: 86
+  halflife: '3.82 d'
+  alpha: true
+  beta: false
+  family: nob
+  br: null
+- symbol: Po
+  A: 218
+  Z: 84
+  halflife: '3.10 min'
+  alpha: true
+  beta: true
+  family: chalc
+  br: 0.998
+- symbol: At
+  A: 218
+  Z: 85
+  halflife: '1.3 s'
+  alpha: true
+  beta: false
+  family: hal
+  br: null
+- symbol: Pb
+  A: 214
+  Z: 82
+  halflife: '27.1 min'
+  alpha: false
+  beta: true
+  family: post
+  br: null
+- symbol: Bi
+  A: 214
+  Z: 83
+  halflife: '19.7 min'
+  alpha: true
+  beta: true
+  family: post
+  br: 0.0002
+- symbol: Tl
+  A: 210
+  Z: 81
+  halflife: '1.30 min'
+  alpha: false
+  beta: true
+  family: post
+  br: null
+- symbol: Po
+  A: 214
+  Z: 84
+  halflife: '164 $\mu$s'
+  alpha: true
+  beta: false
+  family: chalc
+  br: null
+- symbol: Pb
+  A: 210
+  Z: 82
+  halflife: '22.2 y'
+  alpha: true
+  beta: true
+  family: post
+  br: 0.001
+- symbol: Bi
+  A: 210
+  Z: 83
+  halflife: '5.01 d'
+  alpha: true
+  beta: true
+  family: post
+  br: 0.999
+- symbol: Tl
+  A: 206
+  Z: 81
+  halflife: '4.20 min'
+  alpha: false
+  beta: true
+  family: post
+  br: null
+- symbol: Po
+  A: 210
+  Z: 84
+  halflife: '138.4 d'
+  alpha: true
+  beta: false
+  family: chalc
+  br: null
+- symbol: Hg
+  A: 206
+  Z: 80
+  halflife: '8.32 min'
+  alpha: false
+  beta: true
+  family: post
+  br: null
+- symbol: Pb
+  A: 206
+  Z: 82
+  halflife: stable
+  alpha: false
+  beta: false
+  family: post
+  br: null

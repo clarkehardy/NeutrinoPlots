@@ -1,0 +1,11 @@
+# from 2024 PDG summary tables [https://pdg.lbl.gov/2024/web/viewer.html?file=../tables/rpp2024-sum-quarks.pdf,
+# https://pdg.lbl.gov/2024/web/viewer.html?file=../tables/rpp2024-sum-leptons.pdf]
+up: 2.1636e6
+down: 4.7036e6
+charm: 1.273039e9
+strange: 93.5e6
+top: 172.57e9
+bottom: 4.183e9
+electron: 0.51099895000e6
+muon: 105.6583755e6
+tau: 1776.93e6
