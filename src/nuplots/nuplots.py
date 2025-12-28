@@ -1,13 +1,34 @@
+import functools
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from matplotlib import color_sequences
 from matplotlib.colors import to_hex
 import feynman
-from nuplots.utils import CompositePatch, HandlerCompositePatch, get_mass_ranges, get_pmns_matrix
+from nuplots.utils import CompositePatch, HandlerCompositePatch, get_mass_ranges, get_pmns_matrix, set_fonts
 
-def oscillation(params, save_path=None):
+print(__file__)
+
+def plot_in_font(func):
+    """Decorator function to allow other plotting functions to be called in an
+    rcParams context window.
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        font = kwargs.get('font', None)
+        if font is None:
+            return func(*args, **kwargs)
+        serif = kwargs.get('serif', False)
+        font_path = '/'.join(__file__.split('/')[:-3]) + '/fonts/' + font.replace(' ', '') + '/'
+        rcparams = set_fonts(font, font_path, serif=serif)
+        with plt.rc_context(rcparams):
+            return func(*args, **kwargs)
+    return wrapper
+
+@plot_in_font
+def oscillation(params, save_path=None, colors=None, font=None):
     """Make a plot showing the oscillation probability as a function of L/E.
 
     :param params: dictionary of neutrino oscillation parameters
@@ -15,11 +36,12 @@ def oscillation(params, save_path=None):
     :param save_path: path where the figure should be saved, defaults to None
     :type save_path: str, optional
     """
-    colors = color_sequences['tab10']
+    if colors is None:
+        colors = color_sequences['tab10']
     nu_colors = [colors[3], colors[8], colors[0]]
 
-    delta_m21_sq = params['delta_m2_21'][0] # eV^2
-    delta_m31_sq_NH = -params['delta_m2_23'][0] # eV^2 for NH
+    delta_m21_sq = params['delta_m2_21'][0]
+    delta_m31_sq_NH = -params['delta_m2_23'][0]
 
     U = get_pmns_matrix(params)
     L_by_E = np.logspace(2, np.log10(6e4), 1000)
@@ -51,7 +73,8 @@ def oscillation(params, save_path=None):
     if save_path:
         fig.savefig(save_path)
 
-def mass_ordering(params, save_path=None):
+@plot_in_font
+def mass_ordering(params, save_path=None, colors=None, font=None, serif=False):
     """Make a plot showing the ordering of the neutrino masses under both
     ordering scenarios.
 
@@ -60,7 +83,8 @@ def mass_ordering(params, save_path=None):
     :param save_path: path where the figure should be saved, defaults to None
     :type save_path: str, optional
     """
-    colors = color_sequences['tab10']
+    if colors is None:
+        colors = color_sequences['tab10']
     nu_colors = [colors[3], colors[8], colors[0]]
 
     # mass-squared differences are not plotted to scale
@@ -109,7 +133,8 @@ def mass_ordering(params, save_path=None):
     if save_path:
         fig.savefig(save_path)
 
-def mass_scale(fermion_masses, params, save_path=None):
+@plot_in_font
+def mass_scale(fermion_masses, params, save_path=None, colors=None, font=None, serif=False):
     """Make a plot showing the absolute scale of neutrino masses compared to
     all other fermions.
 
@@ -120,7 +145,10 @@ def mass_scale(fermion_masses, params, save_path=None):
     :param save_path: path where the figure should be saved, defaults to None
     :type save_path: str, optional
     """
-    all_colors = [to_hex(c) for c in color_sequences['tab10']]
+    if colors is None:
+        all_colors = [to_hex(c) for c in color_sequences['tab10']]
+    else:
+        all_colors = [to_hex(c) for c in colors]
     nu_colors = [all_colors[3], all_colors[8], all_colors[0]]
 
     other_colors = []
@@ -176,7 +204,8 @@ def mass_scale(fermion_masses, params, save_path=None):
     if save_path:
         fig.savefig(save_path)
 
-def spinors(creation=False, save_path=None):
+@plot_in_font
+def spinors(creation=False, save_path=None, colors=None, font=None, serif=False):
     """Make a plot showing the chiral composition of neutrino helicity states.
 
     :param creation: whether to consider state creation, defaults to False
@@ -184,6 +213,9 @@ def spinors(creation=False, save_path=None):
     :param save_path: path where the figure should be saved
     :type save_path: str, optional
     """
+
+    if colors is None:
+        colors = color_sequences['tab10']
 
     # define position and size parameters
     h_supp_factor = 0.1
@@ -208,7 +240,6 @@ def spinors(creation=False, save_path=None):
     ax.set_aspect('equal')
     title = ['annihilation', 'creation']
     ax.text(3, 2.94, 'Neutrino state ' + title[creation], ha='center', va='top', fontsize=fontsize + 2)
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     color_blue = colors[0]
     color_red = colors[3]
 
@@ -342,7 +373,8 @@ def spinors(creation=False, save_path=None):
     if save_path:
         fig.savefig(save_path, dpi=1200)
 
-def mass_mechanisms(save_path=None, serif=True):
+@plot_in_font
+def mass_mechanisms(save_path=None, colors=None, font=None, serif=False):
     """Make a diagram illustrating the main neutrino mass generation mechanisms.
 
     :param save_path: path where the figure should be saved
@@ -350,212 +382,206 @@ def mass_mechanisms(save_path=None, serif=True):
     :param serif: use serif fonts in the diagram (default is True)
     :type serif: bool
     """
-
-    if serif:
-        rcparams = {'font.family': 'serif', 'mathtext.fontset': 'cm', 'font.serif': 'Times New Roman'}
-    else:
-        rcparams = None
-
-    with plt.rc_context(rcparams):
-
-        # size of the figure
-        x_scale = 6
-        y_scale = 4
-
-        # font sizes
-        textsize = 12
-        symbolsize = 14
-        masssize = 14
-
-        # set colors for each group of elements
+    if colors is None:
         colors = color_sequences['tab10']
-        scheme = [colors[2], colors[4], colors[3], colors[0], colors[5], colors[1]]
-        path1 = scheme[0]
-        path2 = scheme[1]
-        sm = scheme[2]
-        dirac = scheme[3]
-        left = scheme[4]
-        right = scheme[5]
-        alpha = 0.15
 
-        # arrow, line, hatch, and marker parameters
-        lw = 1.
-        ls = ':'
-        arrow_size = lw/10.
-        t1_params = {'color':path1, 'width':arrow_size, 'length':3*arrow_size}
-        t2_params = {'color':path2, 'width':arrow_size, 'length':3*arrow_size}
-        di_params = {'color':dirac, 'width':arrow_size, 'length':3*arrow_size}
-        hatch = '/' + '/'*int(18//x_scale)
-        ms = 8*lw
+    # size of the figure
+    x_scale = 6
+    y_scale = 4
 
-        # padding as a fraction of the full width
-        x_pad = 0.02
-        y_pad = 0.02
+    # font sizes
+    textsize = 12
+    symbolsize = 14
+    masssize = 14
 
-        # define the locations of vertices
-        x_v = 0.12
-        y_v = 0.72
-        x_N = 0.21
-        y_N = 0.22
-        x_M = 0.50
-        slope = (y_v - y_N)/(x_v - x_N)
-        inter = y_N -slope*x_N
-        y_D = 0.5
-        x_D = (y_D - y_N)/slope + x_N
-        l_h = 0.08
-        l_d = 0.13
+    # set colors for each group of elements
+    scheme = [colors[2], colors[4], colors[3], colors[0], colors[5], colors[1]]
+    path1 = scheme[0]
+    path2 = scheme[1]
+    sm = scheme[2]
+    dirac = scheme[3]
+    left = scheme[4]
+    right = scheme[5]
+    alpha = 0.15
 
-        # define the box sizes
-        w_bg = 0.06*x_scale
-        h_bg = 0.10*y_scale
-        w_SM = 0.08*x_scale
-        h_SM = 0.14*y_scale
-        px_D = (x_v - 0.08)*x_scale
-        py_D = (y_N - 0.06)*y_scale
-        w_D = 0.22*x_scale
-        h_D = 0.65*y_scale
-        w_t2 = 0.88*x_scale
-        h_t2 = 0.28*y_scale
-        py_t2 = 0.63*y_scale
-        w_t1 = 0.26*x_scale
-        h_t1 = 0.75*y_scale
-        h2_t1 = 0.25*h_t1
-        px_t1 = 0.02*x_scale
-        py_t1 = 0.10*y_scale
+    # arrow, line, hatch, and marker parameters
+    lw = 1.
+    ls = ':'
+    arrow_size = lw/10.
+    t1_params = {'color':path1, 'width':arrow_size, 'length':3*arrow_size}
+    t2_params = {'color':path2, 'width':arrow_size, 'length':3*arrow_size}
+    di_params = {'color':dirac, 'width':arrow_size, 'length':3*arrow_size}
+    hatch = '/' + '/'*int(18//x_scale)
+    ms = 8*lw
 
-        # create a new figure
-        fig, ax = plt.subplots(figsize=(x_scale, y_scale), layout='constrained')
-        diagram = feynman.Diagram(ax)
+    # padding as a fraction of the full width
+    x_pad = 0.02
+    y_pad = 0.02
 
-        # define all the vertices
-        v1 = diagram.vertex(xy=(x_v*x_scale, y_v*y_scale), marker='')
-        v2 = diagram.vertex(xy=(x_D*x_scale, y_D*y_scale), marker='.', ms=0.5*ms, color=dirac)
-        v6 = diagram.vertex(xy=((1 - x_D)*x_scale, y_D*y_scale), marker='.', ms=0.5*ms, color=dirac)
-        v9 = diagram.vertex(xy=((x_D - l_h)*x_scale, y_D*y_scale), marker='x', ms=ms, color=dirac, mew=lw)
-        v10 = diagram.vertex(xy=((1 - x_D + l_h)*x_scale, y_D*y_scale), marker='x', ms=ms, color=dirac, mew=lw)
-        v3 = diagram.vertex(xy=(x_N*x_scale, y_N*y_scale), marker='')
-        v4 = diagram.vertex(xy=(x_M*x_scale, y_N*y_scale), marker='x', ms=ms, color=path1, mew=lw)
-        v5 = diagram.vertex(xy=((1 - x_N)*x_scale, y_N*y_scale), marker='')
-        v7 = diagram.vertex(xy=((1 - x_v)*x_scale, y_v*y_scale), marker='')
-        v8 = diagram.vertex(xy=(x_M*x_scale, y_v*y_scale), marker='.', ms=0.5*ms, color=path2, mew=lw)
-        v11 = diagram.vertex(xy=(x_M*x_scale, (y_v + l_d)*y_scale), marker='x', ms=ms, color=path2, mew=lw)
+    # define the locations of vertices
+    x_v = 0.12
+    y_v = 0.72
+    x_N = 0.21
+    y_N = 0.22
+    x_M = 0.50
+    slope = (y_v - y_N)/(x_v - x_N)
+    inter = y_N -slope*x_N
+    y_D = 0.5
+    x_D = (y_D - y_N)/slope + x_N
+    l_h = 0.08
+    l_d = 0.13
 
-        # add lines between vertices
-        l1 = diagram.line(v1, v2, lw=lw, color=dirac, arrow_param=di_params)
-        l2 = diagram.line(v3, v2, lw=lw, color=dirac, arrow_param=di_params)
-        l5 = diagram.line(v5, v6, lw=lw, color=dirac, arrow_param=di_params)
-        l6 = diagram.line(v7, v6, lw=lw, color=dirac, arrow_param=di_params)
-        l9 = diagram.line(v2, v9, lw=lw, ls='--', color=dirac, arrow=False)
-        l10 = diagram.line(v6, v10, lw=lw, ls='--', color=dirac, arrow=False)
-        l3 = diagram.line(v4, v3, lw=lw, color=path1, arrow_param=t1_params)
-        l4 = diagram.line(v4, v5, lw=lw, color=path1, arrow_param=t1_params)
-        l7 = diagram.line(v7, v8, lw=lw, color=path2, arrow_param=t2_params)
-        l8 = diagram.line(v1, v8, lw=lw, color=path2, arrow_param=t2_params)
-        l11 = diagram.line(v8, v11, lw=lw, ls='--', color=path2, arrow=False)
+    # define the box sizes
+    w_bg = 0.06*x_scale
+    h_bg = 0.10*y_scale
+    w_SM = 0.08*x_scale
+    h_SM = 0.14*y_scale
+    px_D = (x_v - 0.08)*x_scale
+    py_D = (y_N - 0.06)*y_scale
+    w_D = 0.22*x_scale
+    h_D = 0.65*y_scale
+    w_t2 = 0.88*x_scale
+    h_t2 = 0.28*y_scale
+    py_t2 = 0.63*y_scale
+    w_t1 = 0.26*x_scale
+    h_t1 = 0.75*y_scale
+    h2_t1 = 0.25*h_t1
+    px_t1 = 0.02*x_scale
+    py_t1 = 0.10*y_scale
 
-        # background behind labels
-        bg1 = Rectangle((x_v*x_scale - w_bg/2., y_v*y_scale - h_bg/2.), w_bg, h_bg, fc='white', ec='none', zorder=99)
-        bg2 = Rectangle(((1 - x_v)*x_scale - w_bg/2., y_v*y_scale - h_bg/2.), w_bg, h_bg, fc='white', ec='none', zorder=99)
-        ax.add_patch(bg1)
-        ax.add_patch(bg2)
+    # create a new figure
+    fig, ax = plt.subplots(figsize=(x_scale, y_scale), layout='constrained')
+    diagram = feynman.Diagram(ax)
 
-        # box defining interactions in minimal SM
-        r1 = Rectangle((x_v*x_scale - w_SM/2., y_v*y_scale - h_SM/2.), w_SM, h_SM, fc='none', \
-                    ec=sm, lw=lw, ls=ls, zorder=999)
-        r2 = Rectangle(((1 - x_v)*x_scale - w_SM/2., y_v*y_scale - h_SM/2.), w_SM, h_SM, fc='none', \
-                    ec=sm, lw=lw, ls=ls, zorder=999)
-        ax.add_patch(r1)
-        ax.add_patch(r2)
+    # define all the vertices
+    v1 = diagram.vertex(xy=(x_v*x_scale, y_v*y_scale), marker='')
+    v2 = diagram.vertex(xy=(x_D*x_scale, y_D*y_scale), marker='.', ms=0.5*ms, color=dirac)
+    v6 = diagram.vertex(xy=((1 - x_D)*x_scale, y_D*y_scale), marker='.', ms=0.5*ms, color=dirac)
+    v9 = diagram.vertex(xy=((x_D - l_h)*x_scale, y_D*y_scale), marker='x', ms=ms, color=dirac, mew=lw)
+    v10 = diagram.vertex(xy=((1 - x_D + l_h)*x_scale, y_D*y_scale), marker='x', ms=ms, color=dirac, mew=lw)
+    v3 = diagram.vertex(xy=(x_N*x_scale, y_N*y_scale), marker='')
+    v4 = diagram.vertex(xy=(x_M*x_scale, y_N*y_scale), marker='x', ms=ms, color=path1, mew=lw)
+    v5 = diagram.vertex(xy=((1 - x_N)*x_scale, y_N*y_scale), marker='')
+    v7 = diagram.vertex(xy=((1 - x_v)*x_scale, y_v*y_scale), marker='')
+    v8 = diagram.vertex(xy=(x_M*x_scale, y_v*y_scale), marker='.', ms=0.5*ms, color=path2, mew=lw)
+    v11 = diagram.vertex(xy=(x_M*x_scale, (y_v + l_d)*y_scale), marker='x', ms=ms, color=path2, mew=lw)
 
-        # box defining interactions for pure Dirac neutrinos
-        r3 = Rectangle((px_D, py_D), w_D, h_D, ec=dirac, fc='none', lw=lw, ls=ls, zorder=999)
-        r4 = Rectangle((x_scale - px_D - w_D, py_D), w_D, h_D, ec=dirac, fc='none', lw=lw, ls=ls, zorder=999)
-        ax.add_patch(r3)
-        ax.add_patch(r4)
+    # add lines between vertices
+    l1 = diagram.line(v1, v2, lw=lw, color=dirac, arrow_param=di_params)
+    l2 = diagram.line(v3, v2, lw=lw, color=dirac, arrow_param=di_params)
+    l5 = diagram.line(v5, v6, lw=lw, color=dirac, arrow_param=di_params)
+    l6 = diagram.line(v7, v6, lw=lw, color=dirac, arrow_param=di_params)
+    l9 = diagram.line(v2, v9, lw=lw, ls='--', color=dirac, arrow=False)
+    l10 = diagram.line(v6, v10, lw=lw, ls='--', color=dirac, arrow=False)
+    l3 = diagram.line(v4, v3, lw=lw, color=path1, arrow_param=t1_params)
+    l4 = diagram.line(v4, v5, lw=lw, color=path1, arrow_param=t1_params)
+    l7 = diagram.line(v7, v8, lw=lw, color=path2, arrow_param=t2_params)
+    l8 = diagram.line(v1, v8, lw=lw, color=path2, arrow_param=t2_params)
+    l11 = diagram.line(v8, v11, lw=lw, ls='--', color=path2, arrow=False)
 
-        # regions defining chirality and particle/antiparticle state
-        r5 = Rectangle((-x_pad*x_scale, -y_pad*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
-                    ls='none', color=right, alpha=alpha, lw=lw, zorder=100)
-        r7 = Rectangle((-x_pad*x_scale, 0.50*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
-                    ls='none', color=left, alpha=alpha, lw=lw, zorder=100)
-        with plt.rc_context({'hatch.linewidth': lw}):
-            r6 = CompositePatch(Rectangle, (0.50*x_scale, -y_pad*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
-                                ls='none', color=left, hatch=hatch, alpha=alpha, lw=lw, zorder=100)
-            r8 = CompositePatch(Rectangle, (0.5*x_scale, 0.50*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
-                                ls='none', color=right, hatch=hatch, alpha=alpha, lw=lw, zorder=100)
-        ax.add_artist(r5)
-        ax.add_artist(r6)
-        ax.add_artist(r7)
-        ax.add_artist(r8)
+    # background behind labels
+    bg1 = Rectangle((x_v*x_scale - w_bg/2., y_v*y_scale - h_bg/2.), w_bg, h_bg, fc='white', ec='none', zorder=99)
+    bg2 = Rectangle(((1 - x_v)*x_scale - w_bg/2., y_v*y_scale - h_bg/2.), w_bg, h_bg, fc='white', ec='none', zorder=99)
+    ax.add_patch(bg1)
+    ax.add_patch(bg2)
 
-        # box defining interactions for Type-II seesaw mechanism
-        r9 = Rectangle(((x_scale - w_t2)/2., py_t2), w_t2, h_t2, ec=path2, fc='none', lw=lw, ls=ls, zorder=999)
-        ax.add_artist(r9)
+    # box defining interactions in minimal SM
+    r1 = Rectangle((x_v*x_scale - w_SM/2., y_v*y_scale - h_SM/2.), w_SM, h_SM, fc='none', \
+                ec=sm, lw=lw, ls=ls, zorder=999)
+    r2 = Rectangle(((1 - x_v)*x_scale - w_SM/2., y_v*y_scale - h_SM/2.), w_SM, h_SM, fc='none', \
+                ec=sm, lw=lw, ls=ls, zorder=999)
+    ax.add_patch(r1)
+    ax.add_patch(r2)
 
-        # region defining interactions for Type-I seesaw mechanism
-        b1 = Line2D((px_t1, px_t1), (py_t1, py_t1 + h_t1), color=path1, lw=lw, \
-                    ls=ls, zorder=999)
-        b2 = Line2D((x_scale - px_t1, x_scale - px_t1), (py_t1, py_t1 + h_t1), \
-                    color=path1, lw=lw, ls=ls, zorder=999)
-        b3 = Line2D((px_t1, x_scale - px_t1), (py_t1, py_t1), color=path1, lw=lw, \
-                    ls=ls, zorder=999)
-        b4 = Line2D((px_t1, px_t1 + w_t1), (py_t1 + h_t1, py_t1 + h_t1), \
-                    color=path1, lw=lw, ls=ls, zorder=999)
-        b5 = Line2D((x_scale - px_t1 - w_t1, x_scale - px_t1), (py_t1 + h_t1, py_t1 + h_t1), \
-                    color=path1, lw=lw, ls=ls, zorder=999)
-        b6 = Line2D((px_t1 + w_t1, px_t1 + w_t1), (py_t1 + h_t1, py_t1 + h2_t1), \
-                    color=path1, lw=lw, ls=ls, zorder=999)
-        b7 = Line2D((x_scale - px_t1 - w_t1, x_scale - px_t1 - w_t1), (py_t1 + h_t1, py_t1 + h2_t1), \
-                    color=path1, lw=lw, ls=ls, zorder=999)
-        b8 = Line2D((px_t1 + w_t1, x_scale - px_t1 - w_t1), (py_t1 + h2_t1, py_t1 + h2_t1), \
-                    color=path1, lw=lw, ls=ls, zorder=999)
-        ax.add_line(b1)
-        ax.add_line(b2)
-        ax.add_line(b3)
-        ax.add_line(b4)
-        ax.add_line(b5)
-        ax.add_line(b6)
-        ax.add_line(b7)
-        ax.add_line(b8)
+    # box defining interactions for pure Dirac neutrinos
+    r3 = Rectangle((px_D, py_D), w_D, h_D, ec=dirac, fc='none', lw=lw, ls=ls, zorder=999)
+    r4 = Rectangle((x_scale - px_D - w_D, py_D), w_D, h_D, ec=dirac, fc='none', lw=lw, ls=ls, zorder=999)
+    ax.add_patch(r3)
+    ax.add_patch(r4)
 
-        # labels for fermion lines
-        diagram.text(x_v*x_scale, y_v*y_scale, r'$\nu$', fontsize=symbolsize, zorder=999)
-        diagram.text((1 - x_v)*x_scale, y_v*y_scale, r'$\nu$', fontsize=symbolsize, zorder=999)
-        diagram.text(x_D*x_scale, y_N*y_scale, r'$\overline{N}$', fontsize=symbolsize, zorder=999)
-        diagram.text((1 - x_D)*x_scale, y_N*y_scale, r'$\overline{N}$', fontsize=symbolsize, zorder=999)
-        diagram.text((x_D - l_h + 0.02)*x_scale, (y_D - 0.07)*y_scale, r'$\left<\Phi\right>$', \
-                    color=dirac, fontsize=symbolsize, zorder=999)
-        diagram.text((1 - x_D + l_h - 0.02)*x_scale, (y_D - 0.07)*y_scale, r'$\left<\Phi\right>$', \
-                    color=dirac, fontsize=symbolsize, zorder=999)
-        diagram.text(0.45*x_scale, (y_v + l_d - 0.03)*y_scale, r'$\left<\Delta\right>$', \
-                    color=path2, fontsize=symbolsize, zorder=999)
+    # regions defining chirality and particle/antiparticle state
+    r5 = Rectangle((-x_pad*x_scale, -y_pad*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                ls='none', color=right, alpha=alpha, lw=lw, zorder=100)
+    r7 = Rectangle((-x_pad*x_scale, 0.50*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                ls='none', color=left, alpha=alpha, lw=lw, zorder=100)
+    with plt.rc_context({'hatch.linewidth': lw}):
+        r6 = CompositePatch(Rectangle, (0.50*x_scale, -y_pad*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                            ls='none', color=left, hatch=hatch, alpha=alpha, lw=lw, zorder=100)
+        r8 = CompositePatch(Rectangle, (0.5*x_scale, 0.50*y_scale), (0.5 + x_pad)*x_scale, (0.5 + y_pad)*y_scale, \
+                            ls='none', color=right, hatch=hatch, alpha=alpha, lw=lw, zorder=100)
+    ax.add_artist(r5)
+    ax.add_artist(r6)
+    ax.add_artist(r7)
+    ax.add_artist(r8)
 
-        # mass generation mechanism labels
-        diagram.text(0.5*x_scale, 0.55*y_scale, 'Minimal Standard Model', color=sm, fontsize=textsize, zorder=999)
-        diagram.text(0.5*x_scale, 0.45*y_scale, 'Pure Dirac', fontsize=textsize, color=dirac, zorder=999)
-        diagram.text(0.5*x_scale, 0.95*y_scale, 'Type-II seesaw', color=path2, fontsize=textsize, zorder=999)
-        diagram.text(0.5*x_scale, 0.35*y_scale, 'Type-I seesaw', color=path1, fontsize=textsize, zorder=999)
+    # box defining interactions for Type-II seesaw mechanism
+    r9 = Rectangle(((x_scale - w_t2)/2., py_t2), w_t2, h_t2, ec=path2, fc='none', lw=lw, ls=ls, zorder=999)
+    ax.add_artist(r9)
 
-        # chirality labels
-        diagram.text(0.13*x_scale, 0.95*y_scale, 'Left-handed', fontsize=textsize, color=left, zorder=999)
-        diagram.text(0.87*x_scale, 0.95*y_scale, 'Right-handed', fontsize=textsize, color=right, zorder=999)
-        diagram.text(0.11*x_scale, 0.04*y_scale, '$L=+1$', fontsize=textsize, color='k', zorder=999)
-        diagram.text(0.89*x_scale, 0.04*y_scale, '$L=-1$', fontsize=textsize, color='k', zorder=999)
-        diagram.text(0.50*x_scale, 0.04*y_scale, r'$Time$  $\longrightarrow$', fontsize=textsize, zorder=999, math_fontfamily='cm')
+    # region defining interactions for Type-I seesaw mechanism
+    b1 = Line2D((px_t1, px_t1), (py_t1, py_t1 + h_t1), color=path1, lw=lw, \
+                ls=ls, zorder=999)
+    b2 = Line2D((x_scale - px_t1, x_scale - px_t1), (py_t1, py_t1 + h_t1), \
+                color=path1, lw=lw, ls=ls, zorder=999)
+    b3 = Line2D((px_t1, x_scale - px_t1), (py_t1, py_t1), color=path1, lw=lw, \
+                ls=ls, zorder=999)
+    b4 = Line2D((px_t1, px_t1 + w_t1), (py_t1 + h_t1, py_t1 + h_t1), \
+                color=path1, lw=lw, ls=ls, zorder=999)
+    b5 = Line2D((x_scale - px_t1 - w_t1, x_scale - px_t1), (py_t1 + h_t1, py_t1 + h_t1), \
+                color=path1, lw=lw, ls=ls, zorder=999)
+    b6 = Line2D((px_t1 + w_t1, px_t1 + w_t1), (py_t1 + h_t1, py_t1 + h2_t1), \
+                color=path1, lw=lw, ls=ls, zorder=999)
+    b7 = Line2D((x_scale - px_t1 - w_t1, x_scale - px_t1 - w_t1), (py_t1 + h_t1, py_t1 + h2_t1), \
+                color=path1, lw=lw, ls=ls, zorder=999)
+    b8 = Line2D((px_t1 + w_t1, x_scale - px_t1 - w_t1), (py_t1 + h2_t1, py_t1 + h2_t1), \
+                color=path1, lw=lw, ls=ls, zorder=999)
+    ax.add_line(b1)
+    ax.add_line(b2)
+    ax.add_line(b3)
+    ax.add_line(b4)
+    ax.add_line(b5)
+    ax.add_line(b6)
+    ax.add_line(b7)
+    ax.add_line(b8)
 
-        # labels for mass insertions
-        diagram.text((x_D + 0.04)*x_scale, y_D*y_scale, r'$y_\nu$', fontsize=masssize, color=dirac, zorder=999)
-        diagram.text((1 - x_D - 0.04)*x_scale, y_D*y_scale, r'$y_\nu$', fontsize=masssize, color=dirac, zorder=999)
-        diagram.text(0.50*x_scale, 0.15*y_scale, r'$m_\mathrm{M}$', fontsize=masssize, color=path1, zorder=999)
-        diagram.text(0.50*x_scale, 0.67*y_scale, r'$y_\mathrm{L}$', fontsize=masssize, color=path2, zorder=999)
+    # labels for fermion lines
+    diagram.text(x_v*x_scale, y_v*y_scale, r'$\nu$', fontsize=symbolsize, zorder=999)
+    diagram.text((1 - x_v)*x_scale, y_v*y_scale, r'$\nu$', fontsize=symbolsize, zorder=999)
+    diagram.text(x_D*x_scale, y_N*y_scale, r'$\overline{N}$', fontsize=symbolsize, zorder=999)
+    diagram.text((1 - x_D)*x_scale, y_N*y_scale, r'$\overline{N}$', fontsize=symbolsize, zorder=999)
+    diagram.text((x_D - l_h + 0.02)*x_scale, (y_D - 0.07)*y_scale, r'$\left<\Phi\right>$', \
+                color=dirac, fontsize=symbolsize, zorder=999)
+    diagram.text((1 - x_D + l_h - 0.02)*x_scale, (y_D - 0.07)*y_scale, r'$\left<\Phi\right>$', \
+                color=dirac, fontsize=symbolsize, zorder=999)
+    diagram.text(0.45*x_scale, (y_v + l_d - 0.03)*y_scale, r'$\left<\Delta\right>$', \
+                color=path2, fontsize=symbolsize, zorder=999)
 
-        # plot everything and set the axes
-        diagram.plot()
-        ax.set_axis_off()
-        ax.set_xlim([-x_pad*x_scale, x_scale*(1 + x_pad)])
-        ax.set_ylim([-y_pad*y_scale, y_scale*(1 + y_pad)])
-        ax.set_aspect('equal')
+    # mass generation mechanism labels
+    diagram.text(0.5*x_scale, 0.55*y_scale, 'Minimal Standard Model', color=sm, fontsize=textsize, zorder=999)
+    diagram.text(0.5*x_scale, 0.45*y_scale, 'Pure Dirac', fontsize=textsize, color=dirac, zorder=999)
+    diagram.text(0.5*x_scale, 0.95*y_scale, 'Type-II seesaw', color=path2, fontsize=textsize, zorder=999)
+    diagram.text(0.5*x_scale, 0.35*y_scale, 'Type-I seesaw', color=path1, fontsize=textsize, zorder=999)
 
-        if save_path:
-            fig.savefig(save_path, pad_inches=-0.1)
+    # chirality labels
+    diagram.text(0.13*x_scale, 0.95*y_scale, 'Left-handed', fontsize=textsize, color=left, zorder=999)
+    diagram.text(0.87*x_scale, 0.95*y_scale, 'Right-handed', fontsize=textsize, color=right, zorder=999)
+    diagram.text(0.11*x_scale, 0.04*y_scale, '$L=+1$', fontsize=textsize, color='k', zorder=999)
+    diagram.text(0.89*x_scale, 0.04*y_scale, '$L=-1$', fontsize=textsize, color='k', zorder=999)
+    diagram.text(0.50*x_scale, 0.04*y_scale, r'$Time$  $\longrightarrow$', fontsize=textsize, zorder=999)
+
+    # labels for mass insertions
+    diagram.text((x_D + 0.04)*x_scale, y_D*y_scale, r'$y_\nu$', fontsize=masssize, color=dirac, zorder=999)
+    diagram.text((1 - x_D - 0.04)*x_scale, y_D*y_scale, r'$y_\nu$', fontsize=masssize, color=dirac, zorder=999)
+    diagram.text(0.50*x_scale, 0.15*y_scale, r'$m_\mathrm{M}$', fontsize=masssize, color=path1, zorder=999)
+    diagram.text(0.50*x_scale, 0.67*y_scale, r'$y_\mathrm{L}$', fontsize=masssize, color=path2, zorder=999)
+
+    # plot everything and set the axes
+    diagram.plot()
+    ax.set_axis_off()
+    ax.set_xlim([-x_pad*x_scale, x_scale*(1 + x_pad)])
+    ax.set_ylim([-y_pad*y_scale, y_scale*(1 + y_pad)])
+    ax.set_aspect('equal')
+
+    if save_path:
+        fig.savefig(save_path, pad_inches=-0.1)
 

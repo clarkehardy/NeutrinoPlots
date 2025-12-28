@@ -350,3 +350,29 @@ def set_fonts(font_name, font_path, serif=False):
     plt.rcParams['text.usetex'] = False
     plt.rcParams['font.family'] = font_family
     plt.rcParams['font.' + font_family] = font_name
+
+
+def set_fonts(font_name, font_path, serif=False):
+    """Set the font used by matplotlib.
+
+    :param font_name: Name of the font
+    :type font_name: str
+    :param font_path: Path to the folder containing the .ttf files
+    :type font_path: str
+    """
+
+    font_family = 'serif' if serif else 'sans-serif'
+    mathfont = 'cm' if serif else 'dejavusans'
+
+    if font_name not in fm.fontManager.get_font_names():
+        fonts_dir = os.path.abspath(font_path)
+        font_variants = glob.glob(fonts_dir + '/' + '*.ttf')
+
+        for font in font_variants:
+            font_path = os.path.join(fonts_dir, font)
+            fm.fontManager.addfont(font_path)
+
+    return {'text.usetex': False, \
+            'font.family': font_family, \
+            'font.' + font_family: font_name, \
+            'mathtext.fontset': mathfont}
