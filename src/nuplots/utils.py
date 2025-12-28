@@ -179,7 +179,6 @@ def get_mass_ranges(params):
     return mins, maxs
 
 
-
 def create_text_figure(text, save_path=None, fontsize=24, color='k', facecolor='none', \
                        padding=0.25, dpi=None):
     """Creates a figure with the given text in matplotlib. Used to make
@@ -329,27 +328,6 @@ class HandlerCompositePatch(HandlerPatch):
         patch.set_width(width)
         patch.set_height(height)
         return [patch]
-    
-
-def set_fonts(font_name, font_path, serif=False):
-    """Set the font used by matplotlib.
-
-    :param font_name: Name of the font
-    :type font_name: str
-    :param font_path: Path to the folder containing the .ttf files
-    :type font_path: str
-    """
-    font_family = 'serif' if serif else 'sans-serif'
-    fonts_dir = os.path.abspath(font_path)
-    font_variants = glob.glob(fonts_dir + '/' + '*.ttf')
-
-    for font in font_variants:
-        font_path = os.path.join(fonts_dir, font)
-        fm.fontManager.addfont(font_path)
-
-    plt.rcParams['text.usetex'] = False
-    plt.rcParams['font.family'] = font_family
-    plt.rcParams['font.' + font_family] = font_name
 
 
 def set_fonts(font_name, font_path, serif=False):
