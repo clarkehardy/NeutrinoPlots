@@ -225,39 +225,25 @@ def load_fermion_masses(data_dir='../data'):
     for key in fermion_masses.keys():
         fermion_masses[key] = float(fermion_masses[key])
 
-    # params = load_params(data_dir)
-
-    # # Constants from experiment
-    # delta_m21_sq = params['delta_m2_21'][0] # eV^2
-    # delta_m31_sq_NH = -params['delta_m2_23'][0] # eV^2 for NH
-    # delta_m32_sq_IH = params['delta_m2_23'][0] # eV^2 for IH
-    # sum_mass_limit = 0.12 # from Planck [eq. (1) in arXiv:1912.08208]
-
-    # m_lightest = np.concatenate(([0], np.linspace(1e-4, 0.1, 1000)))
-    # all_masses = []
-
-    # for m1 in m_lightest:
-    #     # m1_, m2_, m3_ = get_masses_NH(m1)
-    #     m2 = m2_no(m1, delta_m21_sq)
-    #     m3 = m3_no(m1, delta_m21_sq, delta_m31_sq_NH)
-    #     if m1 + m2 + m3 <= sum_mass_limit:
-    #         all_masses.append((m1, m2, m3))
-
-    # for m3 in m_lightest:
-    #     # result = get_masses_IH(m3)
-    #     m1 = m1_io(m3, -delta_m32_sq_IH, delta_m21_sq)
-    #     m2 = m2_io(m3, -delta_m32_sq_IH)
-    #     # if result:
-    #     if np.imag(m1 + m2) == 0:
-    #         # m1_, m2_, m3_ = result
-    #         if m1 + m2 + m3 <= sum_mass_limit:
-    #             all_masses.append((m1, m2, m3))
-
-    # arr = np.array(all_masses)
-    # mins = np.min(arr, axis=0)
-    # maxs = np.max(arr, axis=0)
-
-    # for i, (mi_min, mi_max) in enumerate(zip(mins, maxs), start=1):
-    #     fermion_masses['nu_' + str(i)] = (mi_min, mi_max)
-
     return fermion_masses
+
+
+def load_decay_chain(which='U-238', data_dir='../data'):
+    """Load decay chain data.
+
+    :param which: which decay chain to load
+    :type which: str
+    :param data_dir: directory in which the decay chain is stored
+    :type data_dir: str, optional
+    :return: dictionary containing the decay chain
+    :rtype: dict
+    """
+
+    with open(data_dir + '/' + which.replace('-', '').lower() + '_chain.yaml', 'r') as f:
+        chain = yaml.safe_load(f)
+
+    for isotope in chain:
+        if isotope['br'] is None:
+            isotope['br'] = np.nan
+
+    return chain

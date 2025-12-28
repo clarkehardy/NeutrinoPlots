@@ -2,14 +2,13 @@ import functools
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Rectangle, Polygon
+from matplotlib.colors import to_rgba, to_hex
 from matplotlib.lines import Line2D
 from matplotlib import color_sequences
-from matplotlib.colors import to_hex
 import feynman
 from nuplots.utils import CompositePatch, HandlerCompositePatch, get_mass_ranges, get_pmns_matrix, set_fonts
 
-print(__file__)
 
 def plot_in_font(func):
     """Decorator function to allow other plotting functions to be called in an
@@ -584,4 +583,83 @@ def mass_mechanisms(save_path=None, colors=None, font=None, serif=False):
 
     if save_path:
         fig.savefig(save_path, pad_inches=-0.1)
+
+
+@plot_in_font
+def decay_chain(chain, save_path=None, colors=None, font=None, serif=None):
+    """Plot a decay chain given the decay data series.
+
+    :param chain: the decay data to plot
+    :type chain: dict
+    :param save_path: path where the figure should be saved
+    :type save_path: str, optional
+    """
+    vertices = np.array(((0, 0), (0, 1), (1/np.sqrt(2), 1 + 1/np.sqrt(2)), \
+                     (1 + 1/np.sqrt(2), 1 + 1/np.sqrt(2)), (1 + 2/np.sqrt(2), 1), \
+                     (1 + 2/np.sqrt(2), 0), (1 + 1/np.sqrt(2), -1/np.sqrt(2)), \
+                     (1/np.sqrt(2), -1/np.sqrt(2)), (0, 0))) - np.array((0.5 + 1/np.sqrt(2), 0.5))
+    scale = 0.2
+    z_spacing = 2.8
+    font_base = 12
+    lw_base = 10
+    hl_offset = np.array((0, -scale*0.7))
+    sym_offset = np.array((0, scale*0.05))
+    alpha_offset = np.array((0, -0.5 - 1/np.sqrt(2)))*scale
+    beta_offset = np.array((0.5 + 0.5/np.sqrt(2), 0.5 + 0.5/np.sqrt(2)))*scale
+    family_keys = np.array(['act', 'alk-e', 'nob', 'chalc', 'hal', 'post'])
+
+    if colors is None:
+        colors = ['#8ab0cb', '#ffd6ad', '#a7af8c', '#cccaff', '#e5a8cd', '#b9a7a8']
+
+    def draw_radioisotope(axis, symbol, A, Z, halflife, alpha, beta, family, br):
+        position = np.array(((Z - A/2)*z_spacing*scale, Z*z_spacing*scale))
+        color = to_rgba(colors[np.argwhere(family_keys==family)[0][0]], alpha=0.5)
+        p = Polygon(position + scale*vertices, fc=color, ec='k', lw=lw_base*scale/z_spacing)
+        axis.add_artist(p)
+        axis.text(*(position + sym_offset), '$^{{{}}}_{{{}}}${}'.format(A, '~~' + str(Z), symbol), ha='center', va='center', fontsize=10*font_base*scale/z_spacing)
+        axis.text(*(position + hl_offset), halflife, ha='center', va='center', fontsize=6*font_base*scale/z_spacing)
+        if alpha:
+            ls = '-'
+            if br <= 1e-2:
+                ls = ':'
+            axis.annotate("", xytext=position + alpha_offset, \
+                          xy=position - alpha_offset - np.array((0, 2*z_spacing*scale)), \
+                          arrowprops=dict(arrowstyle="-|>", mutation_scale=15*lw_base*scale/z_spacing, \
+                                          shrinkA=0, shrinkB=0, color='k', lw=lw_base*scale/z_spacing, ls=ls))
+            axis.text(*(position + alpha_offset + np.array((0.15*scale*z_spacing, -0.5*scale*z_spacing))), \
+                      r'$\alpha$', ha='center', va='center', fontsize=8*font_base*scale/z_spacing)
+        if beta:
+            ls = '-'
+            if br >= 1 - 1e-2:
+                ls = ':'
+            axis.annotate("", xytext=position + beta_offset, \
+                          xy=position - beta_offset + np.array((z_spacing*scale, z_spacing*scale)), \
+                          arrowprops=dict(arrowstyle="-|>", mutation_scale=15*lw_base*scale/z_spacing, \
+                                          shrinkA=0, shrinkB=0, color='k', lw=lw_base*scale/z_spacing, ls=ls))
+            axis.text(*(position + beta_offset + np.array((0.4*scale*z_spacing, 0.*scale*z_spacing))), \
+                      r'$\beta^{-}$', ha='center', va='center', fontsize=8*font_base*scale/z_spacing)
+
+    fig, ax = plt.subplots(figsize=(4, 6), layout='constrained')
+
+    x_vals = []
+    for d in chain:
+        x_vals.append(d['Z'] - d['A']/2)
+    x_vals = np.array(x_vals)
+
+    Z_min = np.amin([d['Z'] for d in chain])
+    Z_max = np.amax([d['Z'] for d in chain])
+
+    ax.set_frame_on(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_aspect('equal')
+
+    ax.set_ylim([(Z_min - 0.5)*z_spacing*scale, (Z_max + 0.5)*z_spacing*scale])
+    ax.set_xlim([np.amin(x_vals - 0.5)*z_spacing*scale, np.amax(x_vals + 0.5)*z_spacing*scale])
+
+    for d in chain:
+        draw_radioisotope(ax, d['symbol'], d['A'], d['Z'], d['halflife'], d['alpha'], d['beta'], d['family'], d['br'])
+
+    if save_path:
+        fig.savefig(save_path)
 
