@@ -23,13 +23,13 @@ if __name__=='__main__':
     npoints = args.npoints
     nsamples = args.nsamples
     outfile = args.outfile
-    if outfile=='':
+    if outfile == '':
         outfile = 'lobster_vanilla.png'
 
     print('Loading the oscillation parameters...')
     params = load_params()
 
     print('Making the plot...')
-    fig,axs = lobster_vanilla(params=params,npoints=npoints,nsamples=nsamples)
+    fig,axs = lobster_vanilla(params=params, npoints=npoints, nsamples=nsamples)
     fig.savefig(outfile)
     print('Figure saved to {}'.format(outfile))

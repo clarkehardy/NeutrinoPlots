@@ -35,7 +35,7 @@ if __name__=='__main__':
     allowed = args.allowed
     kde = args.kde
     sum = args.sum
-    if outfile=='':
+    if outfile == '':
         outfile = 'lobster_density.png'
     if data_path == '':
         data_path = None
@@ -52,6 +52,6 @@ if __name__=='__main__':
 
     print('Making the plot...')
     fig,axs = lobster_density(samples_no=samples_no, samples_io=samples_io, nbins=nbins, npoints=npoints,\
-                      params=params, style=style, sum=sum, cmap='magma_r', data_save_path=data_path)
+                              params=params, style=style, sum=sum, cmap='magma_r', data_save_path=data_path)
     fig.savefig(outfile)
     print('Figure saved to {}'.format(outfile))

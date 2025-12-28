@@ -140,10 +140,18 @@ def get_pmns_matrix(params):
 
 
 def get_mass_ranges(params):
+    """Get the minimum and maximum values of the three neutrino masses under
+    either ordering scenario.
+
+    :param params: neutrino oscillation parameters
+    :type params: dict
+    :return: array of minimum and array of maximum neutrino mass values
+    :rtype: tuple
+    """
     # Constants from experiment
-    delta_m21_sq = params['delta_m2_21'][0] # eV^2
-    delta_m31_sq_NH = -params['delta_m2_23'][0] # eV^2 for NH
-    delta_m32_sq_IH = params['delta_m2_23'][0] # eV^2 for IH
+    delta_m21_sq = params['delta_m2_21'][0]
+    delta_m31_sq_NH = -params['delta_m2_23'][0]
+    delta_m32_sq_IH = params['delta_m2_23'][0]
     sum_mass_limit = 0.12 # from Planck [eq. (1) in arXiv:1912.08208]
 
     m_lightest = np.concatenate(([0], np.linspace(1e-4, 0.1, 1000)))

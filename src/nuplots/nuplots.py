@@ -203,7 +203,7 @@ def lobster_vanilla(params, npoints=200, nsamples=1e4, sum=False, save_path=None
     m_lightest_io,m_lower_io,m_upper_io = get_contours(params, inverted=True, npoints=npoints, \
                                                        nsamples=nsamples, sum=sum)
 
-    fig,ax = plt.subplots(figsize=(4, 3), layout='constrained')
+    fig,ax = plt.subplots(figsize=(6, 4.5), layout='constrained')
     ax.fill_between(m_lightest_no, m_lower_no, m_upper_no, color=colors[0], alpha=0.5, lw=0, \
                     label='Normal ordering')
     ax.fill_between(m_lightest_io, m_lower_io, m_upper_io, color=colors[1], alpha=0.5, lw=0, \
@@ -426,7 +426,7 @@ def spinors(creation=False, save_path=None, colors=None, font=None, serif=False)
 
     if colors is None:
         colors = color_sequences['tab10']
-        colors = [colors[3], colors[0]]
+        colors = [colors[0], colors[3]]
 
     # define position and size parameters
     h_supp_factor = 0.1
@@ -812,7 +812,10 @@ def decay_chain(chain, save_path=None, colors=None, font=None, serif=None):
                      (1 + 1/np.sqrt(2), 1 + 1/np.sqrt(2)), (1 + 2/np.sqrt(2), 1), \
                      (1 + 2/np.sqrt(2), 0), (1 + 1/np.sqrt(2), -1/np.sqrt(2)), \
                      (1/np.sqrt(2), -1/np.sqrt(2)), (0, 0))) - np.array((0.5 + 1/np.sqrt(2), 0.5))
-    scale = 0.2
+
+    Z_min = np.amin([d['Z'] for d in chain])
+    Z_max = np.amax([d['Z'] for d in chain])
+    scale = 2.4/(Z_max - Z_min)
     z_spacing = 2.8
     font_base = 12
     lw_base = 10
@@ -859,9 +862,6 @@ def decay_chain(chain, save_path=None, colors=None, font=None, serif=None):
     for d in chain:
         x_vals.append(d['Z'] - d['A']/2)
     x_vals = np.array(x_vals)
-
-    Z_min = np.amin([d['Z'] for d in chain])
-    Z_max = np.amax([d['Z'] for d in chain])
 
     ax.set_frame_on(False)
     ax.set_xticks([])

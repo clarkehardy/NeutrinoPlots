@@ -1,4 +1,6 @@
 from tqdm import tqdm
+import emcee
+from multiprocessing import Pool, cpu_count
 from nuplots.load_data import *
 from nuplots.mass_funcs import *
 
@@ -91,7 +93,7 @@ def get_contours(params, inverted=False, npoints=100, nsamples=1e4, sum=False):
     return m_lightest,m_lower,m_upper
 
 
-def lnlike(theta,chi2_funcs,params,ln_prior):
+def lnlike(theta, chi2_funcs, params, ln_prior):
     """Log-likehood function based on experimental data from oscillations and limits on the effective
     electron antineutrino mass and the effective Majorana mass.
     """
@@ -127,7 +129,7 @@ def lnlike(theta,chi2_funcs,params,ln_prior):
     return result
 
 
-def lnprior(theta,inverted):
+def lnprior(theta, inverted):
     """Log-prior on the parameters. Priors are taken to be scale-invariant, i.e. uniform on [0,2*pi]
     for angles and log-uniform for masses.
     """
@@ -157,7 +159,7 @@ def lnprior(theta,inverted):
     return result
 
 
-def lnprob(theta,inverted,chi2_funcs,params):
+def lnprob(theta, inverted, chi2_funcs, params):
     """Function to be passed to the MCMC sampler.
     """
 
@@ -165,3 +167,72 @@ def lnprob(theta,inverted,chi2_funcs,params):
     ll = lnlike(theta,chi2_funcs,params,lp)
 
     return lp + ll
+
+
+def mcmc(inverted=False, ncores=10, nwalkers=500, niter=1000, filename=None):
+
+    np.seterr(invalid='ignore')
+
+    if filename is None:
+        filename = 'samples_{}_{}.npy'.format(['no', 'io'][inverted], nwalkers*niter)
+
+    # load the chi-squared data from which the likelihood functions will be constructed
+    data_path = '/'.join(__file__.split('/')[:-3]) + '/data/'
+    chi2_m2_beta_func = load_endpoint_data(data_path)
+    chi2_halflife_func = load_0vbb_data(data_path)
+    chi2_osc_funcs = load_osc_data(inverted=inverted, data_dir=data_path)
+
+    # construct arguments to be passed to the log-probability function
+    chi2_funcs = [chi2_m2_beta_func] + [chi2_halflife_func] + list(chi2_osc_funcs)
+    params = load_params(data_path)
+
+    # use mean as initial guesses for the parameters
+    sigma_mean = 0.16
+    delta_m2_21_mean = params['delta_m2_21'][0]
+    delta_m2_23_mean = params['delta_m2_23'][0]*2.*(0.5-inverted)
+    theta_12_mean = params['theta_12'][0]*np.pi/180.
+    theta_13_mean = params['theta_13'][0]*np.pi/180.
+    alpha_21_mean = np.pi
+    delta_minus_alpha31_mean = np.pi
+
+    # use standard deviation to constrain initial guesses
+    sigma_err = 0.16/3.
+    delta_m2_21_err = params['delta_m2_21'][1]
+    delta_m2_23_err = params['delta_m2_23'][1]
+    theta_12_err = params['theta_12'][1]*np.pi/180.
+    theta_13_err = params['theta_13'][1]*np.pi/180.
+    alpha_21_err = np.pi/3.
+    delta_minus_alpha31_err = np.pi/3.
+
+    # build initial vectors for the mcmc
+    initial_mean = np.array([sigma_mean, delta_m2_21_mean, delta_m2_23_mean,\
+                             theta_12_mean, theta_13_mean, alpha_21_mean, delta_minus_alpha31_mean])
+    initial_err = np.array([sigma_err, delta_m2_21_err, delta_m2_23_err,\
+                            theta_12_err, theta_13_err, alpha_21_err, delta_minus_alpha31_err])
+    ndim = len(initial_mean)
+    p0 = [np.random.normal(loc=initial_mean,scale=initial_err) for i in range(nwalkers)]
+
+    # make sure we're not requesting more cores than there are available
+    if ncores > cpu_count():
+        print('Warning: {} cores requested but only {} available!'.format(ncores, cpu_count()))
+        ncores = cpu_count()
+
+    print('Running MCMC using {} cores'.format(ncores))
+    with Pool(ncores) as pool:
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, pool=pool, \
+                                        moves=emcee.moves.StretchMove(a=20), args=[inverted, chi2_funcs,params])
+        
+        print("Running burn-in...")
+        p0,_,_ = sampler.run_mcmc(p0, 1000, progress=True)
+        sampler.reset()
+
+        print("Running production...")
+        pos,prob,state = sampler.run_mcmc(p0, niter, progress=True)
+
+    print('Saving the results...')
+    samples = sampler.flatchain
+    np.savetxt(filename, samples)
+
+    print('Results saved to {}.'.format(filename))
+
+    return samples
