@@ -1,6 +1,7 @@
 from tqdm import tqdm
 from nuplots.load_data import *
 from nuplots.utils import *
+from nuplots.mass_funcs import *
 
 def get_3sigma_range(m_lightest, params, inverted=False, nsamples=1e4, sum=False):
     """For a single value of the lightest mass, find the 3 sigma range of

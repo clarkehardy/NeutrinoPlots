@@ -30,6 +30,6 @@ if __name__=='__main__':
     params = load_params()
 
     print('Making the plot...')
-    fig,axs = vanilla(params=params,npoints=npoints,nsamples=nsamples)
+    fig,axs = lobster_vanilla(params=params,npoints=npoints,nsamples=nsamples)
     fig.savefig(outfile)
     print('Figure saved to {}'.format(outfile))
