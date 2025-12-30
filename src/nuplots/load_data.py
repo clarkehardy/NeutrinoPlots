@@ -4,8 +4,9 @@ from scipy.interpolate import interp1d
 import csv
 import yaml
 
+data_dir = '/'.join(__file__.split('/')[:-3]) + '/data/'
 
-def load_osc_data(inverted=False, data_dir='../data', plot=False):
+def load_osc_data(inverted=False, data_dir=data_dir, plot=False):
     """Load the one-dimensional projections of the three-neutrino oscillation parameter fit from a global analysis of
     solar, atmospheric, accelerator, and reactor data provided by nu-fit.org.
 
@@ -98,7 +99,7 @@ def load_osc_data(inverted=False, data_dir='../data', plot=False):
     return chi2_sin2_theta12_func,chi2_sin2_theta13_func,chi2_delta_m2_21_func,chi2_delta_m2_23_func
 
 
-def load_endpoint_data(data_dir='../data', plot=False):
+def load_endpoint_data(data_dir=data_dir, plot=False):
     """Load data from beta spectrum endpoint measurements for the effective electron neutrino mass.
 
     :param data_dir: directory in which the oscillation parameters are stored
@@ -144,7 +145,7 @@ def load_endpoint_data(data_dir='../data', plot=False):
     return chi2_m2_beta_func
 
 
-def load_0vbb_data(data_dir='../data', plot=False):
+def load_0vbb_data(data_dir=data_dir, plot=False):
     """Load data from neutrinoless double beta decay searches which place limits on the effective Majorana mass.
 
     :param data_dir: directory in which the oscillation parameters are stored
@@ -189,7 +190,7 @@ def load_0vbb_data(data_dir='../data', plot=False):
     return chi2_halflife_func
 
 
-def load_params(data_dir='../data'):
+def load_params(data_dir=data_dir):
     """Load parameters used to calculate the effective Majorana mass from the 0vbb
     half life, including the phase space factor, matrix element, and axial-vector
     coupling constant.
@@ -208,7 +209,7 @@ def load_params(data_dir='../data'):
     return params
 
 
-def load_fermion_masses(data_dir='../data'):
+def load_fermion_masses(data_dir=data_dir):
     """Load the fermion masses.
 
     :param data_dir: directory in which the fermion masses are stored
@@ -228,7 +229,7 @@ def load_fermion_masses(data_dir='../data'):
     return fermion_masses
 
 
-def load_decay_chain(which='U-238', data_dir='../data'):
+def load_decay_chain(which='U-238', data_dir=data_dir):
     """Load decay chain data.
 
     :param which: which decay chain to load
