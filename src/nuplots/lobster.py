@@ -192,19 +192,18 @@ def mcmc(inverted=False, ncores=10, nwalkers=500, niter=1000, filename=None):
         filename = 'samples_{}_{}.npy'.format(['no', 'io'][inverted], nwalkers*niter)
 
     # load the chi-squared data from which the likelihood functions will be constructed
-    data_path = '/'.join(__file__.split('/')[:-3]) + '/data/'
-    chi2_m2_beta_func = load_endpoint_data(data_path)
-    chi2_halflife_func = load_0vbb_data(data_path)
-    chi2_osc_funcs = load_osc_data(inverted=inverted, data_dir=data_path)
+    chi2_m2_beta_func = load_endpoint_data()
+    chi2_halflife_func = load_0vbb_data()
+    chi2_osc_funcs = load_osc_data(inverted=inverted)
 
     # construct arguments to be passed to the log-probability function
     chi2_funcs = [chi2_m2_beta_func] + [chi2_halflife_func] + list(chi2_osc_funcs)
-    params = load_params(data_path)
+    params = load_params()
 
     # use mean as initial guesses for the parameters
     sigma_mean = 0.16
     delta_m2_21_mean = params['delta_m2_21'][0]
-    delta_m2_23_mean = params['delta_m2_23'][0]*2.*(0.5-inverted)
+    delta_m2_23_mean = params['delta_m2_23'][0]*2.*(0.5 - inverted)
     theta_12_mean = params['theta_12'][0]*np.pi/180.
     theta_13_mean = params['theta_13'][0]*np.pi/180.
     alpha_21_mean = np.pi
