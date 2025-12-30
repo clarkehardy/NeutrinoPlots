@@ -130,7 +130,7 @@ Distributed under the MIT License. See [LICENSE](`LICENSE`) for more information
 
 ## Author
 
-Clarke Hardy - [cahardy@stanford.edu](mailto:cahardy@stanford.edu)
+Clarke Hardy - [clarke.hardy@yale.edu](mailto:clarke.hardy@yale.edu)
 
 ## References
 
