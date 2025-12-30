@@ -10,19 +10,19 @@ def get_3sigma_range(m_lightest, params, inverted=False, nsamples=1e4, sum=False
     """
     
     # get the allowed ranges from the params dictionary
-    delta_m2_21_range = np.array(params['delta_m2_21'])[(2+2*inverted):(4+2*inverted)]
-    delta_m2_23_range = np.array(params['delta_m2_23'])[(2+2*inverted):(4+2*inverted)]
-    theta_12_range = np.array(params['theta_12'])[(2+2*inverted):(4+2*inverted)]*np.pi/180.
-    theta_13_range = np.array(params['theta_13'])[(2+2*inverted):(4+2*inverted)]*np.pi/180.
+    delta_m2_21_range = np.array(params['delta_m2_21'])[(2+2*inverted):(4 + 2*inverted)]
+    delta_m2_23_range = np.array(params['delta_m2_23'])[(2+2*inverted):(4 + 2*inverted)]
+    theta_12_range = np.array(params['theta_12'])[(2+2*inverted):(4 + 2*inverted)]*np.pi/180.
+    theta_13_range = np.array(params['theta_13'])[(2+2*inverted):(4 + 2*inverted)]*np.pi/180.
 
     # sample values from within the 3 sigma allowed region
     nsamples = int(nsamples)
-    delta_m2_21 = delta_m2_21_range[0] + np.random.beta(0.1,0.1,nsamples)*(delta_m2_21_range[1] - delta_m2_21_range[0])
-    delta_m2_23 = delta_m2_23_range[0] + np.random.beta(0.1,0.1,nsamples)*(delta_m2_23_range[1] - delta_m2_23_range[0])
-    theta_12 = theta_12_range[0] + np.random.beta(0.1,0.1,nsamples)*(theta_12_range[1] - theta_12_range[0])
-    theta_13 = theta_13_range[0] + np.random.beta(0.1,0.1,nsamples)*(theta_13_range[1] - theta_13_range[0])
-    alpha_21 = np.random.uniform(0,2*np.pi,nsamples)
-    delta_minus_alpha31 = np.random.uniform(0,2*np.pi,nsamples)
+    delta_m2_21 = delta_m2_21_range[0] + np.random.beta(0.1, 0.1, nsamples)*(delta_m2_21_range[1] - delta_m2_21_range[0])
+    delta_m2_23 = delta_m2_23_range[0] + np.random.beta(0.1, 0.1, nsamples)*(delta_m2_23_range[1] - delta_m2_23_range[0])
+    theta_12 = theta_12_range[0] + np.random.beta(0.1, 0.1, nsamples)*(theta_12_range[1] - theta_12_range[0])
+    theta_13 = theta_13_range[0] + np.random.beta(0.1, 0.1, nsamples)*(theta_13_range[1] - theta_13_range[0])
+    alpha_21 = np.random.uniform(0, 2*np.pi, nsamples)
+    delta_minus_alpha31 = np.random.uniform(0, 2*np.pi, nsamples)
 
     # initial limits to be replaced as more values are calculated
     m_bb_lower = 1e12
@@ -45,10 +45,10 @@ def get_3sigma_range(m_lightest, params, inverted=False, nsamples=1e4, sum=False
         if inverted:
             for i in range(nsamples):
                 # compute the effective Majorana mass for the inverted ordering
-                m_1 = m1_io(m_lightest,delta_m2_23[i],delta_m2_21[i])
-                m_2 = m2_io(m_lightest,delta_m2_23[i])
-                m_betabeta = m_bb(m_1,m_2,m_lightest,np.sin(theta_12[i]),np.sin(theta_13[i]),\
-                                  np.cos(theta_12[i]),np.cos(theta_13[i]),alpha_21[i],delta_minus_alpha31[i])
+                m_1 = m1_io(m_lightest, delta_m2_23[i], delta_m2_21[i])
+                m_2 = m2_io(m_lightest, delta_m2_23[i])
+                m_betabeta = m_bb(m_1, m_2, m_lightest, np.sin(theta_12[i]), np.sin(theta_13[i]), \
+                                  np.cos(theta_12[i]), np.cos(theta_13[i]), alpha_21[i], delta_minus_alpha31[i])
                 
                 # replace the bounds if the new values fall outside them
                 if m_betabeta > m_bb_upper:
@@ -59,10 +59,10 @@ def get_3sigma_range(m_lightest, params, inverted=False, nsamples=1e4, sum=False
         else:
             for i in range(nsamples):
                 # compute the effective Majorana mass for the normal ordering
-                m_2 = m2_no(m_lightest,delta_m2_21[i])
-                m_3 = m3_no(m_lightest,delta_m2_21[i],delta_m2_23[i])
-                m_betabeta = m_bb(m_lightest,m_2,m_3,np.sin(theta_12[i]),np.sin(theta_13[i]),\
-                                  np.cos(theta_12[i]),np.cos(theta_13[i]),alpha_21[i],delta_minus_alpha31[i])
+                m_2 = m2_no(m_lightest, delta_m2_21[i])
+                m_3 = m3_no(m_lightest, delta_m2_21[i], delta_m2_23[i])
+                m_betabeta = m_bb(m_lightest, m_2, m_3, np.sin(theta_12[i]), np.sin(theta_13[i]), \
+                                  np.cos(theta_12[i]), np.cos(theta_13[i]), alpha_21[i], delta_minus_alpha31[i])
                 
                 # replace the bounds if the new values fall outside them
                 if m_betabeta > m_bb_upper:
@@ -140,7 +140,7 @@ def lnprior(theta, inverted):
         if angle<0 or angle>2*np.pi:
             return -np.inf
         
-    if sigma<0 or delta_m2_21<0 or (delta_m2_23*(inverted-0.5))<0:
+    if sigma < 0 or delta_m2_21 < 0 or (delta_m2_23*(inverted - 0.5)) < 0:
         return -np.inf
     
     # make sure none of the masses are zero
@@ -152,7 +152,7 @@ def lnprior(theta, inverted):
     
     prior_sigma = -np.log(sigma)
     prior_m2_21 = -np.log(delta_m2_21)
-    prior_m2_23 = -np.log(2.*(inverted-0.5)*delta_m2_23)
+    prior_m2_23 = -np.log(2.*(inverted - 0.5)*delta_m2_23)
     
     result =  prior_sigma + prior_m2_21 + prior_m2_23
 
@@ -170,6 +170,21 @@ def lnprob(theta, inverted, chi2_funcs, params):
 
 
 def mcmc(inverted=False, ncores=10, nwalkers=500, niter=1000, filename=None):
+    """Run the MCMC sampler.
+
+    :param inverted: use inverted ordering, defaults to False
+    :type inverted: bool, optional
+    :param ncores: number of CPU cores to use, defaults to 10
+    :type ncores: int, optional
+    :param nwalkers: number of walkers, defaults to 500
+    :type nwalkers: int, optional
+    :param niter: number of iterations, defaults to 1000
+    :type niter: int, optional
+    :param filename: path to the output file, defaults to None
+    :type filename: str, optional
+    :return: the array of samples
+    :rtype: numpy.ndarray
+    """
 
     np.seterr(invalid='ignore')
 
